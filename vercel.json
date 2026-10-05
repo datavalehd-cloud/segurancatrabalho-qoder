@@ -1,0 +1,24 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "echo \"sem build — front-end estatico em web/\"",
+  "outputDirectory": "web",
+  "installCommand": "npm install",
+  "rewrites": [
+    { "source": "/functions/v1/app", "destination": "/api/app" }
+  ],
+  "headers": [
+    {
+      "source": "/styles.css",
+      "headers": [{ "key": "cache-control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/js/(.*)",
+      "headers": [{ "key": "cache-control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/functions/v1/app",
+      "headers": [{ "key": "cache-control", "value": "no-store" }]
+    }
+  ]
+}

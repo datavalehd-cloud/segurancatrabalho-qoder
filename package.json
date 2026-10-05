@@ -1,0 +1,15 @@
+{
+  "name": "jl-portal-treinamentos",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Portal de Treinamentos e Segurança do Trabalho (JL Consultoria) — frontend estático + Edge Function no Vercel com banco Supabase.",
+  "scripts": {
+    "dev": "vercel dev",
+    "export:data": "node scripts/export-instructor-report.mjs",
+    "make:seed": "node scripts/generate-seed.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4"
+  }
+}
