@@ -14,16 +14,22 @@
   let cert = null;
   let cloudOk = null; // null = ainda verificando
 
+  // progresso/pendencia/certificado ficam sob chave por e-mail do aluno, para um
+  // dispositivo compartilhado nao herdar o progresso de outro aluno.
+  const scopedKey = (base) => (student && student.email ? base + ':' + student.email : base);
+  function loadStudentData() {
+    try { progress = JSON.parse(localStorage.getItem(scopedKey(LS_PROGRESS))) || {}; } catch { progress = {}; }
+    try { pending = JSON.parse(localStorage.getItem(scopedKey(LS_PENDING))) || []; } catch { pending = []; }
+    try { cert = JSON.parse(localStorage.getItem(scopedKey(LS_CERT))) || null; } catch { cert = null; }
+  }
   function load() {
     try { student = JSON.parse(localStorage.getItem(LS_STUDENT)) || null; } catch { student = null; }
-    try { progress = JSON.parse(localStorage.getItem(LS_PROGRESS)) || {}; } catch { progress = {}; }
-    try { pending = JSON.parse(localStorage.getItem(LS_PENDING)) || []; } catch { pending = []; }
-    try { cert = JSON.parse(localStorage.getItem(LS_CERT)) || null; } catch { cert = null; }
+    loadStudentData();
   }
   function saveStudent() { localStorage.setItem(LS_STUDENT, JSON.stringify(student)); }
-  function saveProgress() { localStorage.setItem(LS_PROGRESS, JSON.stringify(progress)); }
-  function savePending() { localStorage.setItem(LS_PENDING, JSON.stringify(pending)); }
-  function saveCert() { localStorage.setItem(LS_CERT, JSON.stringify(cert)); }
+  function saveProgress() { localStorage.setItem(scopedKey(LS_PROGRESS), JSON.stringify(progress)); }
+  function savePending() { localStorage.setItem(scopedKey(LS_PENDING), JSON.stringify(pending)); }
+  function saveCert() { localStorage.setItem(scopedKey(LS_CERT), JSON.stringify(cert)); }
 
   function esc(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -134,6 +140,8 @@
       }
       student = { name, email, company };
       saveStudent();
+      loadStudentData(); // recarrega o progresso DESSE e-mail: aluno novo = zero
+      cloudOk = null;
       location.hash = '#/painel';
       route();
       syncCloud().then(route);
