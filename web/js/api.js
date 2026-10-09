@@ -86,6 +86,21 @@
         body: JSON.stringify(payload)
       });
     },
+    myCertificates(email, signal) {
+      return requestJson('/functions/v1/app?action=my_certificates&email=' + encodeURIComponent(email), { signal });
+    },
+    instructorSettings(password, signal) {
+      return requestJson('/functions/v1/app?action=instructor_settings', {
+        signal, headers: { 'x-instructor-pass': password }
+      });
+    },
+    instructorSaveSettings(payload, signal) {
+      return requestJson('/functions/v1/app?action=instructor_save_settings', {
+        method: 'POST', signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    },
     instructorReport(password, signal) {
       return requestJson('/functions/v1/app?action=instructor_report', {
         method: 'POST', signal,

@@ -300,15 +300,48 @@ a { color: inherit; }
   letter-spacing: 1px; margin: 18px 0 10px; text-transform: uppercase;
 }
 .cert-text { text-align: center; font-size: 15.5px; margin: 6px 0; }
+.cert-text.small { font-size: 12.5px; color: #475569; line-height: 1.5; }
 .cert-name {
   text-align: center; font: 800 30px/1.3 Georgia, serif; color: #0e7490;
   border-bottom: 2px solid #dfe6ee; display: inline-block; width: 100%; padding-bottom: 8px; margin: 12px 0;
 }
+.cert-course {
+  text-align: center; font: 800 22px/1.35 Georgia, serif; color: var(--navy); margin: 10px 0 16px;
+}
+.cert-nr { font-size: 15px; font-weight: 700; color: #0e7490; }
+.cert-grid {
+  display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+  margin: 16px 0; padding: 14px 0; border-top: 1px solid #e6ebf1; border-bottom: 1px solid #e6ebf1;
+}
+.cert-grid > div { text-align: center; min-width: 120px; }
+.cert-signs {
+  display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+  margin-top: 40px;
+}
+.cert-sign { flex: 1 1 200px; text-align: center; min-width: 180px; }
+.cert-sign-line { border-top: 1.5px solid #334155; margin: 0 auto 6px; width: 90%; }
+.cert-sign-name { font-weight: 700; font-size: 13.5px; color: #1f2933; }
+.cert-sign-role { font-size: 11.5px; color: #5f6b7a; margin-top: 2px; }
 .cert-list {
   columns: 2; column-gap: 30px; font-size: 13.5px; max-width: 640px; margin: 14px auto;
   padding-left: 18px; color: #34495e;
 }
 .cert-list li { margin-bottom: 5px; break-inside: avoid; }
+.cert-sub {
+  font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--navy);
+  margin: 20px 0 8px; border-bottom: 2px solid #e6ebf1; padding-bottom: 4px;
+}
+.cert-program {
+  columns: 2; column-gap: 34px; font-size: 13px; color: #34495e;
+  margin: 0 0 8px; padding-left: 20px;
+}
+.cert-program li { margin-bottom: 5px; break-inside: avoid; }
+/* programa consolidado: agrupado por curso, coluna única para caber tudo */
+.cert-program.cert-general { columns: 1; padding-left: 18px; font-size: 12.5px; }
+.cert-program.cert-general li { margin-bottom: 7px; line-height: 1.5; }
+.cert-program.cert-general strong { color: var(--navy); }
+.cert-general-card { border: 2px solid var(--accent, #2f9e44); background: linear-gradient(180deg, #f4fbf5, #ffffff); }
+.cert-verso .cert-title.small { font-size: 20px; margin-top: 6px; }
 .cert-foot {
   display: flex; justify-content: space-between; align-items: center;
   margin-top: 26px; border-top: 2px solid #dfe6ee; padding-top: 18px;
@@ -317,6 +350,24 @@ a { color: inherit; }
 .cert-role { font-size: 12px; color: #5f6b7a; }
 .cert .brand-slogan { color: #5f6b7a; }
 .cert-seal { font-size: 46px; animation: shine 2.4s infinite; }
+
+/* ---------- painel: blocos de curso ---------- */
+.course-block { margin: 26px 0; }
+.course-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 14px 18px; margin-bottom: 14px; border-radius: 14px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent, var(--cyan)) 14%, transparent), transparent);
+  border-left: 4px solid var(--accent, var(--cyan));
+}
+.course-title { display: flex; align-items: center; gap: 14px; }
+.course-title h2 { font-size: 19px; margin: 0; color: var(--ink, #e8eef6); }
+.course-icon { font-size: 30px; line-height: 1; }
+.course-side { display: flex; align-items: center; gap: 10px; }
+.set-sub {
+  margin: 18px 0 4px; font: 700 13px 'Segoe UI'; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .4px;
+}
+
 
 /* ---------- confete ---------- */
 .confetti {
@@ -330,6 +381,10 @@ a { color: inherit; }
   .lesson-bar .dots { display: none; }
   .progress-card { flex-direction: column; text-align: center; }
   .cert-list { columns: 1; }
+  .cert-program { columns: 1; }
+  .cert-grid { gap: 18px; }
+  .cert-signs { flex-direction: column; gap: 30px; }
+  .course-head { flex-direction: column; align-items: flex-start; }
   .cert-title { font-size: 25px; }
   .cert-name { font-size: 24px; }
   .cert-border { padding: 22px 18px; }
@@ -343,7 +398,8 @@ a { color: inherit; }
   body::before, body::after { display: none !important; }
   .no-print, .topbar, .footer { display: none !important; }
   .cert-page { padding: 0; }
-  .cert { box-shadow: none; max-width: none; }
+  .cert { box-shadow: none; max-width: none; break-inside: avoid; page-break-inside: avoid; }
+  .cert-verso { break-before: page; page-break-before: always; break-inside: auto; page-break-inside: auto; }
 }
 
 /* ================= animações das cenas ================= */

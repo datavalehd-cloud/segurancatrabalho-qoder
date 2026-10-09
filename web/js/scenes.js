@@ -26,7 +26,24 @@
     'shock-assess': { alt: 'Vítima de choque avaliada com monitor cardíaco', chip: 'Mesmo parecendo bem: avaliação médica (arritmias)' },
     'samu-phone': { alt: 'Instrutora ligando para o SAMU 192', chip: '🚑 SAMU 192 • 24h • grátis' },
     'samu-avc': { alt: 'Instrutora identificando sinais de AVC', chip: 'AVC: S-orria • A-brace • R-epita → U-RGENTE 192' },
-    'samu-call': { alt: 'Instrutora orientando a chegada da ambulância', chip: 'Endereço + referência • não desligue primeiro' }
+    'samu-call': { alt: 'Instrutora orientando a chegada da ambulância', chip: 'Endereço + referência • não desligue primeiro' },
+    'height-harness': { alt: 'Instrutora em plataforma alta com cinto paraquedista e talabarte duplo', chip: 'Acima de 2,00 m = trabalho em altura • AR/PT antes de subir' },
+    'height-anchor': { alt: 'Instrutora apontando ponto de ancoragem e trava-quedas em linha de vida', chip: 'Ancore acima da cabeça • ancoragem certificada (≥ 15 kN)' },
+    'height-rescue': { alt: 'Instrutora operando resgate de trabalhador suspenso em cinto', chip: 'Plano de resgate pronto • suspensão longa = síndrome do arnês' },
+    'site-guardrail': { alt: 'Borda de laje com guarda-corpo, rodapé e tela de proteção', chip: 'EPC primeiro: guarda-corpo + rodapé + telas' },
+    'site-scaffold': { alt: 'Instrutora inspecionando andaime completo com checklist', chip: 'Andaime: piso completo, guardas e acesso seguro' },
+    'site-ppe': { alt: 'Instrutora com EPIs apontando extintor e saída de emergência na obra', chip: 'Capacete com jugular • rotas de fuga • 192/193' },
+    'machine-guard': { alt: 'Instrutora junto a máquina com proteção fixa e botão de emergência', chip: 'Proteções fixas/móveis + intertravamento • nunca burlar' },
+    'machine-loto': { alt: 'Instrutora colocando cadeado e etiqueta em chave seccionadora', chip: 'LOTO: desligue • bloqueie • etiquete • seu cadeado' },
+    'machine-emergency': { alt: 'Instrutora acionando botão de parada de emergência e chamando socorro', chip: 'Parada de emergência acessível • não puxe a vítima presa' },
+    'forklift-check': { alt: 'Instrutora fazendo checklist de pré-operação em empilhadeira', chip: 'Checklist diário: freios, buzina, luzes, garfos, vazamentos' },
+    'forklift-stack': { alt: 'Instrutora orientando empilhamento seguro de paletes sinalizado', chip: 'Capacidade nominal • triângulo de estabilidade • pedestre tem preferência' },
+    'fuel-station': { alt: 'Instrutora aterrando caminhão-tanque em área de inflamáveis', chip: 'Aterramento = sem faísca estática • vapor é que queima' },
+    'fuel-spill': { alt: 'Instrutora contendo vazamento de combustível com kit absorvente', chip: 'Isole • contenha • sem água • elimine fontes de ignição' },
+    'ergo-desk': { alt: 'Instrutora regulando posto de trabalho ergonômico com monitor na altura dos olhos', chip: 'Monitor no nível dos olhos • pés apoiados • pausas reais' },
+    'ergo-lift': { alt: 'Instrutora demonstrando levantamento seguro com joelhos flexionados', chip: 'Dobre os joelhos • coluna reta • carga junto ao corpo' },
+    'mind-stress': { alt: 'Instrutora acolhendo colega estressado com pilha de tarefas', chip: 'Sobrecarga e pressão adoecem — e viram acidente' },
+    'mind-support': { alt: 'Instrutora apontando canal de apoio e denúncia no mural', chip: 'Canal de denúncia seguro • acolhimento • ajuda cedo' }
   };
 
   window.getScene = function (id) {

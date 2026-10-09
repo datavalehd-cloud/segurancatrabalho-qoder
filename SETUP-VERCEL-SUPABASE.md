@@ -13,6 +13,11 @@ Supabase. O site publicado no Qoder Sites continua no ar e intocado.
 - `supabase/migrations/0001_init.sql` — cria `training_results` e `certificates`
   com os índices/constraints que a lógica exige (ex.: único por `email,lesson_id`)
   e **ativa RLS negando acesso anônimo**.
+- `supabase/migrations/0002_cert_per_course.sql` — certificado **por curso** (NR-01):
+  adiciona as colunas de snapshot do curso/cadastro em `certificates` (curso, horas,
+  datas, local, modalidade, instituição, responsável técnico, instrutor), o índice
+  único `email,course_id` (idempotência) e cria `portal_settings` (cadastro da
+  instituição editável na área do instrutor). Também ativa RLS negando acesso anônimo.
 - `scripts/export-instructor-report.mjs` + `scripts/generate-seed.mjs` — exportam os
   dados atuais e geram um `seed.sql` reexecutável.
 
@@ -24,7 +29,8 @@ de modo que a anon key sozinha não lê/escreve nada.
 
 ## Passo 1 — Criar o projeto Supabase
 1. Acesse https://supabase.com e crie um projeto (região mais próxima).
-2. Em **SQL Editor**, rode o conteúdo de `supabase/migrations/0001_init.sql`.
+2. Em **SQL Editor**, rode o conteúdo de `supabase/migrations/0001_init.sql` e,
+   em seguida, `supabase/migrations/0002_cert_per_course.sql` (nessa ordem).
 3. Em **Project Settings → API**, copie a **Project URL**, a **anon key** (não vai
    para o app, mas guarde) e a **service_role key**.
 

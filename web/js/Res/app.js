@@ -11,49 +11,19 @@
   let student = null;
   let progress = {};
   let pending = [];
-  let certs = {}; // courseId -> certificado emitido (cache local por aluno)
+  let cert = null;
   let cloudOk = null; // null = ainda verificando
 
-  // progresso/pendencia/certificado ficam sob chave por e-mail do aluno, para um
-  // dispositivo compartilhado nao herdar o progresso de outro aluno.
-  const scopedKey = (base) => (student && student.email ? base + ':' + student.email : base);
-  function loadStudentData() {
-    try { progress = JSON.parse(localStorage.getItem(scopedKey(LS_PROGRESS))) || {}; } catch { progress = {}; }
-    try { pending = JSON.parse(localStorage.getItem(scopedKey(LS_PENDING))) || []; } catch { pending = []; }
-    try {
-      const raw = JSON.parse(localStorage.getItem(scopedKey(LS_CERT)));
-      certs = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
-    } catch { certs = {}; }
-  }
   function load() {
     try { student = JSON.parse(localStorage.getItem(LS_STUDENT)) || null; } catch { student = null; }
-    loadStudentData();
+    try { progress = JSON.parse(localStorage.getItem(LS_PROGRESS)) || {}; } catch { progress = {}; }
+    try { pending = JSON.parse(localStorage.getItem(LS_PENDING)) || []; } catch { pending = []; }
+    try { cert = JSON.parse(localStorage.getItem(LS_CERT)) || null; } catch { cert = null; }
   }
   function saveStudent() { localStorage.setItem(LS_STUDENT, JSON.stringify(student)); }
-  function saveProgress() { localStorage.setItem(scopedKey(LS_PROGRESS), JSON.stringify(progress)); }
-  function savePending() { localStorage.setItem(scopedKey(LS_PENDING), JSON.stringify(pending)); }
-  function saveCerts() { localStorage.setItem(scopedKey(LS_CERT), JSON.stringify(certs)); }
-
-  const courseDone = (c) => c.lessons.every((id) => progress[id] && progress[id].passed);
-  const coursesDoneCount = () => COURSES.filter(courseDone).length;
-  const LESSON_BY_ID = Object.fromEntries(LESSONS.map((l) => [l.id, l]));
-
-  // Certificado consolidado ("Programa Completo"): cobre todos os módulos de todos os cursos.
-  const GENERAL_ID = 'geral';
-  function generalCourse() {
-    return {
-      id: GENERAL_ID,
-      nr: '',
-      icon: '🎓',
-      color: '#2f9e44',
-      title: 'Programa Completo — Segurança e Saúde do Trabalho',
-      lessons: LESSONS.map((l) => l.id),
-      hours: COURSES.reduce((s, c) => s + (Number(c.hours) || 0), 0),
-      // verso agrupa o conteúdo programático por curso
-      groups: COURSES.map((c) => ({ title: c.title, nr: c.nr, items: c.program || [] })),
-      general: true,
-    };
-  }
+  function saveProgress() { localStorage.setItem(LS_PROGRESS, JSON.stringify(progress)); }
+  function savePending() { localStorage.setItem(LS_PENDING, JSON.stringify(pending)); }
+  function saveCert() { localStorage.setItem(LS_CERT, JSON.stringify(cert)); }
 
   function esc(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -67,6 +37,8 @@
   function passedCount() {
     return LESSONS.filter((l) => progress[l.id] && progress[l.id].passed).length;
   }
+
+  function allPassed() { return passedCount() === TOTAL_LESSONS; }
 
   // ---------- sincronização com a nuvem ----------
   async function flushPending() {
@@ -107,47 +79,13 @@
     } catch { cloudOk = false; }
   }
 
-  // converte a linha snake_case do banco no formato consumido por showCertificate()
-  function mapCert(r) {
-    return {
-      code: r.code, issuedAt: r.issued_at, courseId: r.course_id, courseTitle: r.course_title,
-      hours: r.hours, startedAt: r.started_at, finishedAt: r.finished_at,
-      location: r.location, modality: r.modality,
-      institutionName: r.institution_name, institutionCnpj: r.institution_cnpj, institutionAddress: r.institution_address,
-      technicalName: r.technical_name, technicalRegistry: r.technical_registry,
-      instructorName: r.instructor_name, instructorRegistry: r.instructor_registry,
-    };
-  }
-
-  // restaura certificados já emitidos (oficiais) para este aluno — sobrevive a troca de dispositivo/limpeza de cache
-  async function pullCerts() {
-    if (!student) return;
-    try {
-      const res = await PortalApi.myCertificates(student.email);
-      if (res && Array.isArray(res.items)) {
-        let changed = false;
-        for (const r of res.items) {
-          if (!r.course_id || !r.code) continue;
-          const local = certs[r.course_id];
-          if (!local || !local.code) { certs[r.course_id] = mapCert(r); changed = true; }
-        }
-        if (changed) saveCerts();
-      }
-    } catch { /* offline: mantém o cache local */ }
-  }
-
   // ---------- rotas ----------
   function route() {
     const hash = location.hash || '#/painel';
     if (hash === '#/instrutor') { renderInstructor(); return; }
     if (!student) { renderLogin(); return; }
     if (hash === '#/painel') renderDashboard();
-    else if (hash === '#/certificado') renderCertificates();
-    else if (hash.startsWith('#/certificado/')) {
-      const id = hash.slice('#/certificado/'.length);
-      const course = id === GENERAL_ID ? generalCourse() : COURSES.find((c) => c.id === id);
-      if (course) renderCertificate(course); else renderCertificates();
-    }
+    else if (hash === '#/certificado') renderCertificate();
     else if (hash.startsWith('#/modulo/')) {
       const lesson = LESSONS.find((l) => hash === '#/modulo/' + l.id);
       if (lesson) renderLesson(lesson); else renderDashboard();
@@ -196,8 +134,6 @@
       }
       student = { name, email, company };
       saveStudent();
-      loadStudentData(); // recarrega o progresso DESSE e-mail: aluno novo = zero
-      cloudOk = null;
       location.hash = '#/painel';
       route();
       syncCloud().then(route);
@@ -205,14 +141,14 @@
   }
 
   async function syncCloud() {
-    await Promise.allSettled([flushPending(), pullCloud(), pullCerts()]);
+    await Promise.allSettled([flushPending(), pullCloud()]);
   }
 
   // ---------- dashboard ----------
   function renderDashboard() {
     const done = passedCount();
     const pct = Math.round((done / TOTAL_LESSONS) * 100);
-    const cDone = coursesDoneCount();
+    const cats = [...new Set(LESSONS.map((l) => l.category))];
     const cloudNote = cloudOk === false
       ? `<div class="sync local">💾 Serviço de registros indisponível no momento — seu progresso está salvo neste dispositivo e será sincronizado automaticamente.</div>`
       : pending.length
@@ -236,7 +172,7 @@
       <section class="progress-card">
         <div>
           <h1>Olá, ${esc(student.name.split(' ')[0])}! 👋</h1>
-          <p class="muted">Conclua os módulos de cada curso (aula + quiz com no mínimo 75%) para emitir o certificado daquele curso, no padrão NR-01.</p>
+          <p class="muted">Complete os ${TOTAL_LESSONS} módulos abaixo (aula + quiz com no mínimo 75%) para emitir seu certificado.</p>
         </div>
         <div class="progress-ring" role="img" aria-label="${pct}% concluído">
           <svg viewBox="0 0 120 120">
@@ -248,48 +184,29 @@
         </div>
       </section>
       ${cloudNote}
-      ${COURSES.map((c) => {
-        const doneIn = c.lessons.filter((id) => progress[id] && progress[id].passed).length;
-        const complete = doneIn === c.lessons.length;
-        return `
-        <section class="course-block" style="--accent:${c.color}">
-          <div class="course-head">
-            <div class="course-title">
-              <span class="course-icon">${c.icon}</span>
-              <div>
-                <h2>${esc(c.title)}</h2>
-                <p class="muted">${c.nr ? esc(c.nr) + ' • ' : ''}Carga horária ${c.hours}h • ${c.lessons.length} módulo(s)</p>
+      ${cats.map((cat) => `
+        <h2 class="cat-title">${cat === 'Segurança do Trabalho' ? '🦺' : '⛑️'} ${esc(cat)}</h2>
+        <div class="cards">
+          ${LESSONS.filter((l) => l.category === cat).map((l) => {
+            const p = progress[l.id];
+            const status = p && p.passed
+              ? `<span class="badge done">✔ Concluído — ${p.score}/${p.total}</span>`
+              : p ? `<span class="badge retry">Refazer quiz</span>` : `<span class="badge new">Não iniciado</span>`;
+            return `<a class="module-card" href="#/modulo/${l.id}" style="--accent:${l.color}">
+              <div class="module-icon">${l.icon}</div>
+              <div class="module-info">
+                <h3>${esc(l.title)}</h3>
+                <p class="muted">${l.steps.length} etapas + quiz</p>
+                ${status}
               </div>
-            </div>
-            <div class="course-side">
-              <span class="badge ${complete ? 'done' : doneIn ? 'retry' : 'new'}">${doneIn}/${c.lessons.length}</span>
-              <a class="btn ${complete ? 'primary' : 'ghost'} small" href="#/certificado/${c.id}">${complete ? '🏆 Certificado' : 'Ver curso'}</a>
-            </div>
-          </div>
-          <div class="cards">
-            ${c.lessons.map((lid) => {
-              const l = LESSON_BY_ID[lid];
-              const p = progress[lid];
-              const status = p && p.passed
-                ? `<span class="badge done">✔ Concluído — ${p.score}/${p.total}</span>`
-                : p ? `<span class="badge retry">Refazer quiz</span>` : `<span class="badge new">Não iniciado</span>`;
-              return `<a class="module-card" href="#/modulo/${l.id}" style="--accent:${l.color}">
-                <div class="module-icon">${l.icon}</div>
-                <div class="module-info">
-                  <h3>${esc(l.title)}</h3>
-                  <p class="muted">${l.steps.length} etapas + quiz</p>
-                  ${status}
-                </div>
-              </a>`;
-            }).join('')}
-          </div>
-        </section>`;
-      }).join('')}
-      <a class="cert-card ${cDone ? 'unlocked' : ''}" href="#/certificado">
+            </a>`;
+          }).join('')}
+        </div>`).join('')}
+      <a class="cert-card ${allPassed() ? 'unlocked' : ''}" href="#/certificado">
         <div class="module-icon">🏆</div>
         <div class="module-info">
-          <h3>Meus Certificados</h3>
-          <p class="muted">${cDone ? `${cDone} curso(s) concluído(s) — emita seus certificados no padrão NR-01.` : `Conclua os módulos de um curso para emitir o certificado dele (${done}/${TOTAL_LESSONS} módulos aprovados).`}</p>
+          <h3>Meu Certificado</h3>
+          <p class="muted">${allPassed() ? 'Todos os módulos concluídos — emita seu certificado!' : `Conclua todos os módulos para desbloquear (${done}/${TOTAL_LESSONS}).`}</p>
         </div>
       </a>
     </main>
@@ -446,82 +363,29 @@
     }
   }
 
-  // ---------- certificados (frente e verso no padrão NR-01, item 1.6.1.1) ----------
-  function renderCertificates() {
-    app.innerHTML = `
-    <header class="topbar lesson-bar"><a class="btn ghost small" href="#/painel">← Painel</a>
-      <div class="lesson-title">🏆 Meus Certificados</div><span></span></header>
-    <main class="dash">
-      <div class="cards">
-        ${(() => {
-          const g = generalCourse();
-          const complete = courseDone(g);
-          const issued = certs[GENERAL_ID];
-          const done = passedCount();
-          const status = issued && issued.code
-            ? `<span class="badge done">✔ Emitido — ${esc(issued.code)}</span>`
-            : issued ? `<span class="badge retry">Prévia local</span>`
-              : complete ? `<span class="badge done">Pronto para emitir</span>`
-                : `<span class="badge new">${done}/${LESSONS.length} módulos</span>`;
-          return `<a class="module-card cert-general-card" href="#/certificado/${GENERAL_ID}" style="--accent:${g.color}">
-            <div class="module-icon">${g.icon}</div>
-            <div class="module-info">
-              <h3>${esc(g.title)}</h3>
-              <p class="muted">Todos os cursos • ${g.hours}h</p>
-              ${status}
-            </div>
-          </a>`;
-        })()}
-        ${COURSES.map((c) => {
-          const complete = courseDone(c);
-          const issued = certs[c.id];
-          const status = issued && issued.code
-            ? `<span class="badge done">✔ Emitido — ${esc(issued.code)}</span>`
-            : issued ? `<span class="badge retry">Prévia local</span>`
-              : complete ? `<span class="badge done">Pronto para emitir</span>`
-                : `<span class="badge new">${c.lessons.filter((id) => progress[id] && progress[id].passed).length}/${c.lessons.length} módulos</span>`;
-          return `<a class="module-card" href="#/certificado/${c.id}" style="--accent:${c.color}">
-            <div class="module-icon">${c.icon}</div>
-            <div class="module-info">
-              <h3>${esc(c.title)}</h3>
-              <p class="muted">${c.nr ? esc(c.nr) + ' • ' : ''}${c.hours}h${c.nr ? '' : ' (curso livre)'}</p>
-              ${status}
-            </div>
-          </a>`;
-        }).join('')}
-      </div>
-    </main>`;
-  }
-
-  function renderCertificate(course) {
-    const complete = courseDone(course);
-    const isGeneral = course.id === GENERAL_ID || !!course.general;
-    if (!complete) {
-      const doneIn = course.lessons.filter((id) => progress[id] && progress[id].passed).length;
+  // ---------- certificado ----------
+  function renderCertificate() {
+    if (!allPassed()) {
       app.innerHTML = `
-      <header class="topbar lesson-bar"><a class="btn ghost small" href="#/certificado">← Certificados</a>
-        <div class="lesson-title">${course.icon} Certificado</div><span></span></header>
+      <header class="topbar lesson-bar"><a class="btn ghost small" href="#/painel">← Painel</a>
+        <div class="lesson-title">🏆 Certificado</div><span></span></header>
       <main class="result fail">
         <div class="result-icon">🔒</div>
         <h1>Certificado bloqueado</h1>
-        <p class="muted">${isGeneral
-          ? `Conclua todos os ${course.lessons.length} módulos de todos os cursos com aproveitamento mínimo de 75% (${doneIn}/${course.lessons.length} concluídos) para emitir o certificado do <strong>${esc(course.title)}</strong>.`
-          : `Conclua todos os ${course.lessons.length} módulos do curso <strong>${esc(course.title)}</strong> com aproveitamento mínimo de 75% (${doneIn}/${course.lessons.length} concluídos).`}</p>
+        <p class="muted">Conclua todos os ${TOTAL_LESSONS} módulos com aproveitamento mínimo de 75% (${passedCount()}/${TOTAL_LESSONS} concluídos).</p>
         <div class="lesson-nav center"><a class="btn primary" href="#/painel">Voltar ao painel</a></div>
       </main>`;
       return;
     }
 
-    if (!certs[course.id]) {
+    if (!cert) {
       app.innerHTML = `
-      <header class="topbar lesson-bar"><a class="btn ghost small" href="#/certificado">← Certificados</a>
-        <div class="lesson-title">${course.icon} Certificado</div><span></span></header>
+      <header class="topbar lesson-bar"><a class="btn ghost small" href="#/painel">← Painel</a>
+        <div class="lesson-title">🏆 Certificado</div><span></span></header>
       <main class="result pass">
         <div class="result-icon">🏆</div>
         <h1>Parabéns, ${esc(student.name.split(' ')[0])}!</h1>
-        <p class="muted">${isGeneral
-          ? `Você concluiu <strong>todos os cursos</strong> do programa, somando ${course.hours}h. Emita o certificado consolidado <strong>${esc(course.title)}</strong> no padrão NR-01 (frente e verso).`
-          : `Você concluiu o curso <strong>${esc(course.title)}</strong>${course.nr ? ' (' + esc(course.nr) + ')' : ''} com ${course.hours}h. Emita seu certificado no padrão NR-01 (frente e verso).`}</p>
+        <p class="muted">Você concluiu todos os módulos do treinamento. Emita seu certificado oficial.</p>
         <div id="cert-msg"></div>
         <div class="lesson-nav center"><button class="btn primary big" id="btn-issue">Emitir certificado</button></div>
       </main>`;
@@ -531,132 +395,66 @@
         btn.textContent = 'Emitindo…';
         try {
           const data = await PortalApi.issueCertificate({
-            name: student.name, email: student.email, company: student.company || '', courseId: course.id
+            name: student.name, email: student.email, company: student.company || ''
           });
-          certs[course.id] = data;
-          saveCerts();
-          showCertificate(course, data);
+          cert = { code: data.code, issuedAt: data.issuedAt, preview: false };
+          saveCert();
+          showCertificate();
         } catch (e) {
-          certs[course.id] = { preview: true, issuedAt: new Date().toISOString(), courseId: course.id, courseTitle: course.title, hours: course.hours };
-          saveCerts();
-          app.innerHTML = `
-          <header class="topbar lesson-bar"><a class="btn ghost small" href="#/certificado">← Certificados</a>
-            <div class="lesson-title">${course.icon} Certificado</div><span></span></header>
-          <main class="result pass">
-            <div class="result-icon">⏳</div>
-            <h1>Sem conexão com o serviço</h1>
-            <p class="muted">${esc(e.message)} O código oficial de verificação e os dados da instituição são gravados quando o serviço estiver disponível — tente novamente em instantes.</p>
-            <div class="lesson-nav center">
-              <a class="btn ghost" href="#/certificado">Voltar</a>
-              <button class="btn primary" id="btn-retry-issue">Tentar novamente</button>
-            </div>
-          </main>`;
-          $('#btn-retry-issue').addEventListener('click', () => { delete certs[course.id]; saveCerts(); renderCertificate(course); });
+          cert = { code: null, issuedAt: new Date().toISOString(), preview: true };
+          saveCert();
+          $('#cert-msg').innerHTML = `<div class="sync local">⏳ ${esc(e.message)} Mostrando uma prévia local — o código oficial de verificação é gerado quando o serviço estiver disponível.</div>`;
+          showCertificate();
         }
       });
       return;
     }
-    showCertificate(course, certs[course.id]);
-  }
+    showCertificate();
 
-  function showCertificate(course, data) {
-    const d = data || {};
-    const hours = d.hours || course.hours;
-    const institution = d.institutionName || 'JL Consultoria — Saúde e Segurança do Trabalho';
-    const cnpj = d.institutionCnpj ? `CNPJ ${esc(d.institutionCnpj)}` : 'CNPJ a informar pela instituição';
-    const location = d.location || 'Local a informar pela instituição';
-    const modality = d.modality || 'Semipresencial';
-    const started = d.startedAt ? fmtDate(d.startedAt) : '—';
-    const finished = d.finishedAt ? fmtDate(d.finishedAt) : fmtDate(d.issuedAt || new Date().toISOString());
-    const isGeneral = course.id === GENERAL_ID || !!course.general;
-    const concluiuTexto = isGeneral
-      ? 'concluiu com aproveitamento mínimo de 75% em todos os módulos o'
-      : 'concluiu com aproveitamento mínimo de 75% o curso';
-    // verso: programa agrupado por curso (geral) ou lista única (curso individual)
-    const programHtml = isGeneral
-      ? `<ul class="cert-program cert-general">${(course.groups || []).map((g) => `<li><strong>${esc(g.title)}${g.nr ? ' (' + esc(g.nr) + ')' : ''}:</strong> ${g.items.map(esc).join('; ')}.</li>`).join('')}</ul>`
-      : `<ol class="cert-program">${(course.program || []).map((p) => `<li>${esc(p)}</li>`).join('')}</ol>`;
-    const sig = (name, role, registry) => `
-      <div class="cert-sign">
-        <div class="cert-sign-line"></div>
-        <div class="cert-sign-name">${esc(name || '____________________________')}</div>
-        <div class="cert-sign-role">${esc(role)}${registry ? ' — ' + esc(registry) : ''}</div>
-      </div>`;
-
-    app.innerHTML = `
-    <div class="cert-actions no-print">
-      <a class="btn ghost small" href="#/certificado">← Certificados</a>
-      <div>
-        <button class="btn primary" id="btn-print">🖨️ Imprimir / Salvar PDF</button>
-        ${d.code ? '' : '<button class="btn ghost" id="btn-reissue">Tentar registro oficial</button>'}
+    function showCertificate() {
+      app.innerHTML = `
+      <div class="cert-actions no-print">
+        <a class="btn ghost small" href="#/painel">← Painel</a>
+        <div>
+          <button class="btn primary" id="btn-print">🖨️ Imprimir / Salvar PDF</button>
+          ${cert.code ? '' : '<button class="btn ghost" id="btn-reissue">Tentar registro oficial</button>'}
+        </div>
       </div>
-    </div>
-    <main class="cert-page">
-      <section class="cert">
-        <div class="cert-border">
-          <div class="cert-head">
-            <img class="cert-logo" src="assets/brand/logo-jl.png?v=1" alt="JL — Consultoria de Saúde e Segurança do Trabalho" width="92" height="92">
-            <div class="brand-name">${esc(institution)}</div>
-            <div class="brand-slogan">${esc(cnpj)}${d.institutionAddress ? ' • ' + esc(d.institutionAddress) : ''}</div>
-          </div>
-          <h1 class="cert-title">Certificado de Conclusão</h1>
-          <p class="cert-text">Certificamos que</p>
-          <p class="cert-name">${esc(student.name)}</p>
-          ${student.company ? `<p class="cert-text">da empresa <strong>${esc(student.company)}</strong> (contratante)</p>` : ''}
-          <p class="cert-text">${concluiuTexto}</p>
-          <p class="cert-course">${esc(d.courseTitle || course.title)}${course.nr ? ` <span class="cert-nr">(${esc(course.nr)})</span>` : ''}</p>
-          <div class="cert-grid">
-            <div><div class="cert-date">${hours}h</div><div class="cert-role">Carga horária total</div></div>
-            <div><div class="cert-date">${started}</div><div class="cert-role">Data de início</div></div>
-            <div><div class="cert-date">${finished}</div><div class="cert-role">Data de término</div></div>
-          </div>
-          <p class="cert-text small">Local de realização: <strong>${esc(location)}</strong> • Modalidade: <strong>${esc(modality)}</strong></p>
-          <div class="cert-signs">
-            ${sig(student.name, 'Assinatura do trabalhador')}
-            ${sig(d.instructorName, 'Assinatura do instrutor', d.instructorRegistry)}
-            ${sig(d.technicalName, 'Assinatura do responsável técnico', d.technicalRegistry)}
-          </div>
-          <div class="cert-foot">
-            <div>
-              <div class="cert-date">${fmtDate(d.issuedAt || new Date().toISOString())}</div>
-              <div class="cert-role">Data de emissão</div>
+      <main class="cert-page">
+        <div class="cert">
+          <div class="cert-border">
+            <div class="cert-head">
+              <img class="cert-logo" src="assets/brand/logo-jl.png?v=1" alt="JL — Consultoria de Saúde e Segurança do Trabalho" width="92" height="92">
+              <div class="brand-name">JL Consultoria</div>
+              <div class="brand-slogan">Saúde e Segurança do Trabalho</div>
             </div>
-            <div class="cert-seal">🏅</div>
-            <div>
-              <div class="cert-date">${d.code || 'PRÉVIA SEM CÓDIGO'}</div>
-              <div class="cert-role">${d.code ? 'Código de verificação' : 'Emitido localmente (sem registro)'}</div>
+            <h1 class="cert-title">Certificado de Conclusão</h1>
+            <p class="cert-text">Certificamos que</p>
+            <p class="cert-name">${esc(student.name)}</p>
+            ${student.company ? `<p class="cert-text">da empresa <strong>${esc(student.company)}</strong></p>` : ''}
+            <p class="cert-text">concluiu com aproveitamento o <strong>Curso de Segurança do Trabalho e Primeiros Socorros</strong>,
+            contemplando os módulos:</p>
+            <ul class="cert-list">
+              ${LESSONS.map((l) => `<li>${l.icon} ${esc(l.title)}${progress[l.id] ? ` — ${progress[l.id].score}/${progress[l.id].total}` : ''}</li>`).join('')}
+            </ul>
+            <div class="cert-foot">
+              <div>
+                <div class="cert-date">${fmtDate(cert.issuedAt)}</div>
+                <div class="cert-role">Data de conclusão</div>
+              </div>
+              <div class="cert-seal">🏅</div>
+              <div>
+                <div class="cert-date">${cert.code || 'PRÉVIA SEM CÓDIGO'}</div>
+                <div class="cert-role">${cert.code ? 'Código de verificação' : 'Emitido localmente (sem registro)'}</div>
+              </div>
             </div>
           </div>
         </div>
-      </section>
-      <section class="cert cert-verso">
-        <div class="cert-border">
-          <h2 class="cert-title small">Verso — Conteúdo programático e validação</h2>
-          <p class="cert-text"><strong>Curso:</strong> ${esc(d.courseTitle || course.title)}${course.nr ? ' — ' + esc(course.nr) : ''}</p>
-          <p class="cert-text"><strong>Carga horária total:</strong> ${hours} horas • <strong>Período:</strong> ${started} a ${finished} • <strong>Modalidade:</strong> ${esc(modality)} • <strong>Local:</strong> ${esc(location)}</p>
-          <h3 class="cert-sub">${isGeneral ? 'Conteúdo programático (por curso)' : 'Conteúdo programático'}</h3>
-          ${programHtml}
-          <h3 class="cert-sub">Instituição ministrante</h3>
-          <p class="cert-text small">${esc(institution)} • ${esc(cnpj)}${d.institutionAddress ? ' • ' + esc(d.institutionAddress) : ''}</p>
-          <p class="cert-text small"><strong>Responsável técnico:</strong> ${esc(d.technicalName || 'a informar')}${d.technicalRegistry ? ' (' + esc(d.technicalRegistry) + ')' : ''} • <strong>Instrutor:</strong> ${esc(d.instructorName || 'a informar')}${d.instructorRegistry ? ' (' + esc(d.instructorRegistry) + ')' : ''}</p>
-          <p class="cert-text small">Este certificado é emitido conforme o item 1.6.1.1 da NR-01 e contém, na frente e no verso, os dados exigidos para fiscalização: nome do trabalhador, curso/norma correspondente, carga horária total, datas de início e término, local de realização, assinaturas do trabalhador, do instrutor e do responsável técnico, conteúdo programático e dados da instituição ministrante e da contratante.</p>
-          <div class="cert-foot">
-            <div>
-              <div class="cert-date">${d.code || 'PRÉVIA SEM CÓDIGO'}</div>
-              <div class="cert-role">${d.code ? 'Código de verificação' : 'Emitido localmente (sem registro)'}</div>
-            </div>
-            <div class="cert-seal">🏅</div>
-            <div>
-              <div class="cert-date">${fmtDate(d.issuedAt || new Date().toISOString())}</div>
-              <div class="cert-role">Data de emissão</div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>`;
-    $('#btn-print').addEventListener('click', () => window.print());
-    const re = $('#btn-reissue');
-    if (re) re.addEventListener('click', () => { delete certs[course.id]; saveCerts(); renderCertificate(course); });
+      </main>`;
+      $('#btn-print').addEventListener('click', () => window.print());
+      const re = $('#btn-reissue');
+      if (re) re.addEventListener('click', () => { cert = null; saveCert(); route(); });
+    }
   }
 
   // ---------- área do instrutor ----------
@@ -727,7 +525,6 @@
     <main class="dash instr">
       <div id="instr-content"><p class="muted">Carregando registros…</p></div>
       <div class="reg-modal" id="reg-modal" hidden></div>
-      <div class="reg-modal" id="set-modal" hidden></div>
     </main>
     <footer class="footer">JL Consultoria — Saúde e Segurança do Trabalho.</footer>`;
     $('#instr-exit').addEventListener('click', () => {
@@ -768,7 +565,6 @@
         <div class="instr-toolbar">
           <input id="instr-search" type="search" placeholder="Buscar por nome, empresa ou e-mail…" aria-label="Buscar aluno">
           <span class="muted" id="instr-count"></span>
-          <button class="btn ghost small" id="instr-settings">⚙ Cadastro NR-01</button>
           <button class="btn primary small" id="instr-add">➕ Registrar conclusão</button>
         </div>
         <p class="form-ok" id="instr-flash" role="status" hidden></p>
@@ -1032,106 +828,10 @@
         }
       });
       document.addEventListener('keydown', (e) => {
-        if (e.key !== 'Escape') return;
-        if (!modal.hidden) closeReg();
-        const sm = $('#set-modal');
-        if (sm && !sm.hidden) { sm.hidden = true; sm.innerHTML = ''; }
+        if (e.key === 'Escape' && !modal.hidden) closeReg();
       });
 
       $('#instr-add').addEventListener('click', () => openReg());
-
-      // ---------- cadastro da instituição (dados do certificado NR-01) ----------
-      const setModal = $('#set-modal');
-      const closeSettings = () => { setModal.hidden = true; setModal.innerHTML = ''; };
-      const SETTINGS_INPUTS = [
-        ['institution_name', 'Nome da instituição *', 'text', 'JL Consultoria — Saúde e Segurança do Trabalho'],
-        ['institution_cnpj', 'CNPJ', 'text', '00.000.000/0001-00'],
-        ['institution_address', 'Endereço da instituição', 'text', 'Rua, nº, bairro, cidade/UF'],
-        ['technical_name', 'Responsável técnico', 'text', 'Nome completo'],
-        ['technical_registry', 'Registro do responsável técnico', 'text', 'CRM/CREA/COREN nº'],
-        ['instructor_name', 'Instrutor', 'text', 'Nome completo'],
-        ['instructor_registry', 'Registro do instrutor', 'text', 'Registro profissional nº'],
-        ['location', 'Local de realização', 'text', 'Cidade/UF ou “in company”'],
-        ['modality', 'Modalidade', 'text', 'Semipresencial'],
-      ];
-      const drawSettings = (s, hoursMap) => {
-        const val = (k) => esc(s[k] || '');
-        setModal.innerHTML = `
-          <div class="reg-card" role="dialog" aria-modal="true" aria-labelledby="set-title">
-            <div class="reg-head"><h3 id="set-title">Cadastro do certificado (NR-01)</h3>
-              <button type="button" class="reg-x" id="set-close" aria-label="Fechar">✕</button></div>
-            <p class="muted">Estes dados aparecem na frente e no verso de todos os certificados emitidos, conforme o item 1.6.1.1 da NR-01.</p>
-            <div class="reg-grid">
-              ${SETTINGS_INPUTS.map(([k, label, type, ph]) =>
-                `<label>${label}<input id="set-${k}" type="${type}" maxlength="240" value="${val(k)}" placeholder="${esc(ph)}"></label>`).join('')}
-            </div>
-            <h4 class="set-sub">Carga horária por curso (deixe em branco para usar o padrão do catálogo)</h4>
-            <div class="reg-grid">
-              ${COURSES.map((c) => `<label>${esc(c.title)} (${esc(c.nr || 'livre')})
-                <input id="set-hours-${c.id}" type="number" min="1" max="200" step="1"
-                  value="${hoursMap[c.id] != null ? esc(hoursMap[c.id]) : ''}" placeholder="${c.hours}h (padrão)"></label>`).join('')}
-            </div>
-            <p class="form-error" id="set-error" role="alert" hidden></p>
-            <p class="form-ok" id="set-ok" role="status" hidden></p>
-            <div class="lesson-nav">
-              <button type="button" class="btn ghost" id="set-cancel">Fechar</button>
-              <button type="button" class="btn primary" id="set-save">Salvar cadastro</button>
-            </div>
-          </div>`;
-      };
-      const openSettings = async () => {
-        setModal.hidden = false;
-        setModal.innerHTML = `<div class="reg-card"><p class="muted">Carregando cadastro…</p></div>`;
-        let row = null;
-        try {
-          const res = await PortalApi.instructorSettings(pass);
-          row = res.settings || null;
-        } catch (e2) {
-          if (isAuthError(e2)) { closeSettings(); return authExpired(); }
-          setModal.innerHTML = `<div class="reg-card"><p class="form-error">${esc(e2.message)}</p>
-            <div class="lesson-nav"><button type="button" class="btn ghost" id="set-close">Fechar</button></div></div>`;
-          $('#set-close').addEventListener('click', closeSettings);
-          return;
-        }
-        const s = row || {};
-        let hoursMap = {};
-        try { hoursMap = s.hours_override ? (JSON.parse(s.hours_override) || {}) : {}; } catch { hoursMap = {}; }
-        drawSettings(s, hoursMap);
-
-        $('#set-close').addEventListener('click', closeSettings);
-        $('#set-cancel').addEventListener('click', closeSettings);
-        $('#set-save').addEventListener('click', async () => {
-          const err = $('#set-error'), ok = $('#set-ok');
-          err.hidden = true; ok.hidden = true;
-          const payload = { password: pass };
-          for (const [k] of SETTINGS_INPUTS) payload[k] = $('#set-' + k).value.trim();
-          if (payload.institution_name.length < 2) {
-            err.textContent = 'Informe o nome da instituição (2+ caracteres).'; err.hidden = false; return;
-          }
-          const hours = {};
-          for (const c of COURSES) {
-            const v = $('#set-hours-' + c.id).value.trim();
-            if (v !== '') { const n = Number(v); if (Number.isFinite(n) && n > 0 && n <= 200) hours[c.id] = Math.round(n); }
-          }
-          payload.hours_override = hours;
-          const btn = $('#set-save');
-          btn.disabled = true; btn.textContent = 'Salvando…';
-          try {
-            await PortalApi.instructorSaveSettings(payload);
-            ok.textContent = '✅ Cadastro salvo. Os próximos certificados usarão estes dados.'; ok.hidden = false;
-            btn.textContent = 'Salvar cadastro';
-          } catch (e3) {
-            btn.disabled = false; btn.textContent = 'Salvar cadastro';
-            if (isAuthError(e3)) { closeSettings(); return authExpired(); }
-            err.textContent = e3.message; err.hidden = false;
-          }
-        });
-      };
-      $('#instr-settings').addEventListener('click', openSettings);
-      setModal.addEventListener('click', (e) => {
-        if (e.target === setModal || e.target.closest('#set-close')) closeSettings();
-      });
-
       $('#instr-rows').addEventListener('click', async (e) => {
         const del = e.target.closest('.del-btn');
         if (del) {

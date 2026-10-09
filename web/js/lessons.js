@@ -171,8 +171,273 @@ window.LESSONS = [
       { q: 'Durante a ligação ao 192, você deve:', options: ['Desligar rapidamente para não gastar crédito', 'Responder às perguntas, dar o endereço com referência e não desligar antes do atendente', 'Passar o telefone para a vítima sempre', 'Gritar o endereço e desligar'], answer: 1, explain: 'O atendente precisa das informações para enviar o recurso certo; ele encerra a ligação, não você.' },
       { q: 'O SAMU deve ser chamado para qual situação?', options: ['Dor de cabeça leve há dias', 'Resfriado comum', 'Parada cardiorrespiratória, dor no peito intensa ou sangramento grave', 'Consulta de rotina'], answer: 2, explain: 'O 192 é para urgências e emergências. Casos não urgentes devem ir às unidades de saúde.' }
     ]
+  },
+  {
+    id: 'nr35',
+    icon: '🧗',
+    title: 'NR-35 — Trabalho em Altura',
+    category: 'Normas Regulamentadoras',
+    color: '#1971c2',
+    steps: [
+      { scene: 'height-harness', title: 'O que é trabalho em altura', text: 'Para a NR-35, trabalho em altura é toda atividade executada ACIMA de 2,00 m do nível inferior, onde haja risco de queda. Só pode executar quem é maior de 18 anos, com ASO apto, treinamento válido e AUTORIZAÇÃO formal da empresa. Antes de subir, exige-se Análise de Risco (AR) e, nas atividades não rotineiras, Permissão de Trabalho (PT).' },
+      { scene: 'height-harness', title: 'Condições impeditivas', text: 'NÃO trabalhe em altura se: houver vento forte, chuva ou descarga elétrica; faltar AR/PT aprovada; você estiver sem autorização ou treinamento vencido; houver sinais de cansaço, febre, uso de medicamento que cause sonolência ou alteração emocional. Qualquer condição impeditiva deve ser comunicada ao supervisor ANTES de iniciar — e você tem o direito de recusa.' },
+      { scene: 'height-anchor', title: 'Proteção contra quedas (SPCQ)', text: 'Priorize a proteção COLETIVA: guarda-corpos, rodapés, telas e plataformas. Quando não for possível, use o Sistema de Proteção Contra Quedas: cinto tipo paraquedista, talabarte DUPLO com absorvedor de energia, trava-quedas em linha de vida e ponto de ancoragem certificado (resistência mínima de 15 kN). Ancore ACIMA da cabeça e nunca se conecte em ponto improvisado.' },
+      { scene: 'height-rescue', title: 'Emergência e resgate', text: 'Toda atividade em altura exige PLANO DE RESGATE: quem resgata, com qual equipamento e em quanto tempo. Trabalhador suspenso no cinto por muito tempo pode desenvolver a síndrome do arnês (suspensão inerte) — o resgate deve ser rápido e a vítima avaliada por serviço médico. Em queda com lesão, não mova a vítima (suspeite de coluna), imobilize e chame o SAMU 192.' }
+    ],
+    quiz: [
+      { q: 'Para a NR-35, é trabalho em altura a atividade executada acima de:', options: ['1,00 m', '1,50 m', '2,00 m do nível inferior, com risco de queda', '3,00 m apenas em telhados'], answer: 2, explain: 'A NR-35 considera trabalho em altura toda atividade acima de 2,00 m do nível inferior onde haja risco de queda.' },
+      { q: 'Qual documento é obrigatório ANTES de iniciar trabalho em altura?', options: ['Ordem de serviço de produção', 'Análise de Risco (e PT nas não rotineiras)', 'Cartão de ponto', 'Laudo de insalubridade apenas'], answer: 1, explain: 'A Análise de Risco é obrigatória antes de iniciar; nas atividades não rotineiras soma-se a Permissão de Trabalho (PT).' },
+      { q: 'Qual é a prioridade na proteção contra quedas?', options: ['Cinto de segurança sempre primeiro', 'Proteção coletiva (guarda-corpo, telas, plataformas)', 'Trabalhar mais rápido para ficar menos tempo exposto', 'Usar corda improvisada na estrutura'], answer: 1, explain: 'A hierarquia prioriza proteção coletiva; o SPCQ (cinto, talabarte, trava-quedas, ancoragem) entra quando a coletiva não é possível.' },
+      { q: 'Um colega caiu e ficou suspenso no cinto, consciente. Além do resgate rápido, por que a avaliação médica é urgente?', options: ['Por causa da síndrome do arnês (suspensão inerte)', 'Para preencher a CAT depois', 'Porque o cinto estraga', 'Não é necessário avaliar'], answer: 0, explain: 'A suspensão prolongada no cinto pode causar a síndrome do arnês, com risco de vida: resgate rápido e avaliação médica imediata.' }
+    ]
+  },
+  {
+    id: 'nr18',
+    icon: '🏗️',
+    title: 'NR-18 — Segurança na Construção Civil',
+    category: 'Normas Regulamentadoras',
+    color: '#e67700',
+    steps: [
+      { scene: 'site-guardrail', title: 'O canteiro e o meio ambiente de trabalho', text: 'A NR-18 organiza o canteiro de obras: áreas de vivência (refeitório, sanitários, vestiário), circulação de pessoas e máquinas, armazenamento de materiais e sinalização de segurança. Antes de começar, você deve conhecer as condições do canteiro, as rotas seguras e os riscos da fase atual da obra.' },
+      { scene: 'site-guardrail', title: 'Riscos por fase da obra', text: 'Cada fase tem riscos próprios: escavação (desmoronamento, soterramento), fundação (máquinas, ruído), estrutura (queda de altura, queda de materiais), alvenacia e acabamento (poeira, cortes, trabalho em escadas). O risco muda com o andamento da obra — por isso a análise de risco e o DDS (diálogo diário de segurança) são contínuos.' },
+      { scene: 'site-scaffold', title: 'Proteção coletiva na obra', text: 'Priorize EPC: guarda-corpo e rodapé nas bordas, telas de proteção entre pavimentos, escoramento de valas, passarelas e escadas com corrimão, proteção de vãos e aberturas. Andaimes só com piso completo, guardas e acesso seguro; nunca improvise com tábuas soltas ou tambor. O EPC protege todos ao mesmo tempo — por isso vem antes do EPI.' },
+      { scene: 'site-ppe', title: 'EPI e emergências na obra', text: 'Use o EPI adequado à tarefa: capacete com jugular, calçado de segurança, luvas, óculos, protetor auricular e, em altura, cinto com talabarte. Saiba onde ficam extintores, rotas de fuga e ponto de encontro; em acidente, isole a área, não mova vítima com suspeita de lesão e chame o SAMU 192 (ou Bombeiros 193 em incêndio). Todo acidente deve ser comunicado à empresa.' }
+    ],
+    quiz: [
+      { q: 'O que a NR-18 organiza principalmente?', options: ['Apenas o pagamento de horas extras', 'As condições e o meio ambiente de trabalho no canteiro de obras', 'Somente o projeto arquitetônico', 'A compra de materiais'], answer: 1, explain: 'A NR-18 trata das condições e meio ambiente de trabalho na construção: áreas de vivência, circulações, proteções e sinalização.' },
+      { q: 'Em escavações e valas, o risco típico é:', options: ['Desmoronamento e soterramento', 'Excesso de iluminação', 'Frio intenso', 'Ruído zero'], answer: 0, explain: 'Valas e escavações exigem escoramento e acesso seguro justamente pelo risco de desmoronamento/soterramento.' },
+      { q: 'Qual destes é um Equipamento de Proteção COLETIVA?', options: ['Capacete', 'Guarda-corpo com rodapé nas bordas de laje', 'Luva de vaqueta', 'Protetor auricular'], answer: 1, explain: 'Guarda-corpo, telas e escoramentos protegem todos ao mesmo tempo: são EPC. Capacete, luva e protetor são EPI.' },
+      { q: 'Antes de usar um andaime, você deve verificar:', options: ['Se tem piso completo, guarda-corpo e acesso seguro', 'Se dá para subir mais rápido por ele', 'Se pode retirar o rodapé para passar material', 'Se está encostado na parede apenas'], answer: 0, explain: 'Andaime seguro tem piso completo, proteção lateral e acesso próprio; improvisos e retiradas de proteção causam quedas.' }
+    ]
+  },
+  {
+    id: 'nr12',
+    icon: '⚙️',
+    title: 'NR-12 — Máquinas e Equipamentos',
+    category: 'Normas Regulamentadoras',
+    color: '#495057',
+    steps: [
+      { scene: 'machine-guard', title: 'A máquina e seus riscos', text: 'Toda máquina tem zonas de perigo: pontos de esmagamento, aprisionamento, corte e arraste onde roupas, cabelos e mãos podem ser puxados. Conheça a máquina que você opera: como funciona, onde estão os pontos de risco e quais proteções ela deve ter. Nunca opere máquina sem treinamento e autorização.' },
+      { scene: 'machine-guard', title: 'Proteções e dispositivos de segurança', text: 'A NR-12 exige proteções FIXAS (carencagens que exigem ferramenta para remover), MÓVEIS (portas que param a máquina ao abrir) e INTERTRAVAMENTOS (a máquina não liga com a proteção aberta). O botão de emergência (vermelho, fundo amarelo) deve estar acessível e testado. Proteções removidas ou "burladas" são acidente esperando acontecer.' },
+      { scene: 'machine-loto', title: 'Trabalho seguro e bloqueio de energias (LOTO)', text: 'Para limpeza, ajuste ou manutenção: desligue, BLOQUEIE e ETIQUETE todas as fontes de energia (elétrica, pneumática, hidráulica, gravitacional) — é o LOTO (Lock Out / Tag Out). Cada trabalhador coloca o SEU cadeado. Só opere com Permissão de Trabalho quando exigido e nunca com a máquina em movimento para limpar ou destravar.' },
+      { scene: 'machine-emergency', title: 'Riscos adicionais e emergência', text: 'Máquinas somam riscos: ruído (use protetor), calor, eletricidade e ergonomia (postura e esforço). Em aprisionamento ou acidente: acione a PARADA DE EMERGÊNCIA, desligue a energia, NÃO puxe a vítima pela parte presa e chame socorro (SAMU 192). Em amputação, guarde o segmento em saco limpo, dentro de outro saco com gelo (sem contato direto), e leve com a vítima.' }
+    ],
+    quiz: [
+      { q: 'São zonas de perigo típicas de máquinas:', options: ['Pontos de esmagamento, aprisionamento, corte e arraste', 'Apenas o painel elétrico', 'Somente a base da máquina', 'A área de refeitório'], answer: 0, explain: 'As zonas de perigo concentram esmagamento, aprisionamento, corte e arraste — onde mãos, roupas e cabelos são puxados.' },
+      { q: 'O que faz um intertravamento?', options: ['Aumenta a velocidade da máquina', 'Impede o funcionamento com a proteção aberta e para a máquina ao abri-la', 'Desliga a iluminação da área', 'Trava a porta do refeitório'], answer: 1, explain: 'Intertravamento é o dispositivo que não permite ligar (ou para a máquina) quando a proteção móvel está aberta.' },
+      { q: 'Antes de limpar ou ajustar uma máquina, o procedimento correto é:', options: ['Fazer rápido com ela ligada', 'Desligar, bloquear e etiquetar as fontes de energia (LOTO)', 'Pedir para um colega segurar a peça', 'Usar pano úmido nas partes móveis'], answer: 1, explain: 'LOTO: desligar, bloquear com cadeado individual e etiquetar todas as energias antes de qualquer intervenção.' },
+      { q: 'Em caso de amputação por máquina, o segmento amputado deve:', options: ['Ser lavado em água corrente e descartado', 'Ir em saco limpo, dentro de outro saco com gelo, sem contato direto, junto com a vítima', 'Ser colocado direto no gelo', 'Ficar no local do acidente'], answer: 1, explain: 'O segmento vai em saco limpo e seco, dentro de outro com gelo (sem contato direto), transportado com a vítima ao hospital.' }
+    ]
+  },
+  {
+    id: 'nr11',
+    icon: '📦',
+    title: 'NR-11 — Movimentação e Armazenagem de Materiais',
+    category: 'Normas Regulamentadoras',
+    color: '#5f3dc4',
+    steps: [
+      { scene: 'forklift-check', title: 'Movimentação segura de materiais', text: 'A NR-11 regula transporte, movimentação, armazenagem e manuseio de materiais. No transporte manual, o peso deve ser compatível com sua força — nada de carregar o que pode lesionar sua coluna. Empurre em vez de puxar quando possível, mantenha a carga perto do corpo e use equipamentos (carrinhos, paleteiras) para cargas pesadas.' },
+      { scene: 'forklift-check', title: 'Estabilidade e capacidade nominal', text: 'Empilhadeiras e equipamentos de elevação têm CAPACIDADE NOMINAL (placa de capacidade): nunca exceda. Entenda o triângulo de estabilidade: carga alta, pesada ou descentralizada desloca o centro de gravidade e TOMBA o equipamento. Mantenha os garfos baixos (15-20 cm do piso) ao circular e a carga inclinada para trás.' },
+      { scene: 'forklift-stack', title: 'Checklist e circulação', text: 'Faça a inspeção de pré-operação (checklist): freios, buzina, luzes, pneus, garfos, correntes e vazamentos. Equipamento com defeito é TAGUEADO e não opera. Nas vias internas: velocidade reduzida, buzina em cruzamentos e pontos cegos, pedestre SEMPRE tem preferência, e ninguém circula sob carga suspensa.' },
+      { scene: 'forklift-stack', title: 'Empilhamento e cargas especiais', text: 'Empilhe sobre piso nivelado e resistente, respeitando altura máxima e alinhamento; pilhas instáveis devem ser desfeitas com cuidado e sinalização. Cargas especiais (longas, perigosas, suspensas por içamento) exigem plano, sinalização e equipe treinada. Em acidente com prensamento ou queda de carga: isole, não mova a vítima e chame o SAMU 192.' }
+    ],
+    quiz: [
+      { q: 'O que indica a placa de capacidade nominal de uma empilhadeira?', options: ['O peso máximo que pode ser elevado com segurança na configuração indicada', 'O peso do operador', 'A velocidade máxima na rua', 'A quantidade de combustível'], answer: 0, explain: 'A placa informa a carga máxima segura conforme altura e centro de carga; exceder causa tombamento.' },
+      { q: 'O "triângulo de estabilidade" explica:', options: ['Por que a empilhadeira tomba com carga alta ou descentralizada', 'Como pintar o piso do armazém', 'O formato dos garfos', 'A ordem do checklist'], answer: 0, explain: 'O centro de gravidade fora do triângulo de estabilidade desequilibra o equipamento e provoca tombamento.' },
+      { q: 'Antes de operar, a inspeção de pré-operação deve verificar:', options: ['Somente o nível de combustível', 'Freios, buzina, luzes, pneus, garfos e vazamentos', 'Apenas a cor da máquina', 'Nada, se operou ontem'], answer: 1, explain: 'O checklist diário cobre freios, buzina, iluminação, pneus, garfos, correntes e vazamentos; defeito = equipamento fora de operação.' },
+      { q: 'Na circulação interna com empilhadeira:', options: ['O pedestre deve desviar sempre', 'Buzinar em cruzamentos e pontos cegos, com pedestre tendo preferência', 'Circular com garfos elevados para ver melhor', 'Passar sob carga suspensa para ganhar tempo'], answer: 1, explain: 'Velocidade reduzida, buzina em pontos cegos, pedestre com preferência e nunca circular sob carga suspensa.' }
+    ]
+  },
+  {
+    id: 'nr20',
+    icon: '🛢️',
+    title: 'NR-20 — Inflamáveis e Combustíveis',
+    category: 'Normas Regulamentadoras',
+    color: '#d9480f',
+    steps: [
+      { scene: 'fuel-station', title: 'Inflamáveis: perigos e riscos', text: 'Líquidos inflamáveis liberam vapores que, misturados ao ar, formam atmosferas explosivas — o vapor (não o líquido) é que pega fogo. Conheça o ponto de fulgor: abaixo dele o líquido não libera vapor suficiente para queimar. Em postos, tanques e áreas de transferência, o risco é invisível: vapor acumulado em pontos baixos e espaços confinados.' },
+      { scene: 'fuel-station', title: 'Controles e fontes de ignição', text: 'Controle coletivo primeiro: ventilação, contenção de derrames, aterramento e equipotencialização (evita faísca de eletricidade estática), e classificação de áreas com equipamentos elétricos adequados. Controle fontes de ignição: chama aberta, faíscas, cigarro, celular fora de especificação e superfícies quentes. Trabalho a quente ou a frio exige PERMISSÃO DE TRABALHO.' },
+      { scene: 'fuel-spill', title: 'Proteção contra incêndio e explosão', text: 'Áreas com inflamáveis exigem extintores compatíveis (pó químico, CO₂), hidrantes e sistemas de detecção e alarme, além de sinalização e isolamento da área. Em tanques, respiros e válvulas de segurança controlam a pressão. Saiba onde estão os equipamentos de combate e QUAL classe de fogo você pode enfrentar — e quando deve apenas evacuar.' },
+      { scene: 'fuel-spill', title: 'Emergência: vazamento e incêndio', text: 'Em vazamento: elimine fontes de ignição, isole a área, contenha com material absorvente (nunca jogue água no líquido) e ventile. Em incêndio com inflamáveis: NÃO use jato de água direto (espalha o fogo); use pó químico/espuma e, se sair do controle, evacue e chame os Bombeiros 193. Queimaduras: água corrente 10-20 min e SAMU 192.' }
+    ],
+    quiz: [
+      { q: 'O que realmente pega fogo em um líquido inflamável?', options: ['O líquido em si', 'Os vapores que ele libera, misturados ao ar', 'A embalagem', 'A etiqueta'], answer: 1, explain: 'São os vapores que formam a mistura inflamável com o ar; por isso o risco existe mesmo sem chama no líquido.' },
+      { q: 'Para evitar faísca de eletricidade estática na transferência de inflamáveis:', options: ['Usar celular próximo para iluminar', 'Aterramento e equipotencialização dos equipamentos', 'Despejar de altura para render mais', 'Usar roupa de lã'], answer: 1, explain: 'Aterrar e equalizar potenciais dissipa a carga estática, eliminando uma fonte de ignição comum em transferências.' },
+      { q: 'Trabalho a quente em área com inflamáveis exige:', options: ['Apenas boa vontade', 'Permissão de Trabalho e controles (medições, isolamento, extintores)', 'Somente luva de raspa', 'Nenhuma medida especial'], answer: 1, explain: 'A PT formaliza medições de atmosfera, isolamento da área, vigilância e meios de combate antes de soldar/cortar.' },
+      { q: 'Em vazamento de inflamável, a conduta CORRETA é:', options: ['Jogar água para diluir', 'Eliminar fontes de ignição, isolar e conter com absorvente', 'Acender uma luz para ver melhor', 'Entrar no espaço confinado para fechar a válvula'], answer: 1, explain: 'Água espalha o líquido; o certo é eliminar ignição, isolar a área e conter com material absorvente e ventilação.' }
+    ]
+  },
+  {
+    id: 'nr17',
+    icon: '🪑',
+    title: 'NR-17 — Ergonomia',
+    category: 'Normas Regulamentadoras',
+    color: '#0b7285',
+    steps: [
+      { scene: 'ergo-desk', title: 'O que é ergonomia', text: 'Ergonomia (NR-17) é adaptar o trabalho à pessoa — e não o contrário. Ela olha mobiliário, equipamentos, ritmo, pausas, postura e organização das tarefas para prevenir lesões e adoecimento. Todo posto de trabalho deve ser avaliado (AEP — Análise Ergonômica Preliminar) e ajustado às características de quem o usa.' },
+      { scene: 'ergo-lift', title: 'Riscos ergonômicos e levantamento seguro', text: 'Os riscos mais comuns: posturas inadequadas e mantidas, repetitividade, esforço físico excessivo e levantamento manual de cargas. Para levantar: aproxime-se da carga, pés afastados, coluna reta, dobre os JOELHOS (não a cintura), segure firme e levante com as pernas, mantendo a carga junto ao corpo. Evite torcer o tronco carregando peso.' },
+      { scene: 'ergo-desk', title: 'Posto de trabalho e organização', text: 'Regule o posto: cadeira com altura e apoio ajustáveis, pés apoiados no piso (ou apoio), monitor com o topo na altura dos olhos a ~50-70 cm, teclado e mouse próximos, sem torção de tronco. Organização também é ergonomia: ritmo compatível, pausas reais, metas possíveis e autonomia para organizar a própria tarefa reduzem fadiga e erro.' },
+      { scene: 'ergo-lift', title: 'Sinais de alerta e cuidado', text: 'Fique atento aos sinais: dor ou formigamento em punhos, ombros e pescoço, cansaço que não passa, ardência ou visão embaçada ao fim do dia (fadiga visual), irritação e dificuldade de concentração (fadiga mental). Dor que persiste deve ser comunicada à empresa e avaliada por saúde ocupacional cedo — LER/DORT tratada no início tem recuperação muito melhor.' }
+    ],
+    quiz: [
+      { q: 'O objetivo central da ergonomia (NR-17) é:', options: ['Aumentar a velocidade a qualquer custo', 'Adaptar o trabalho às características psicofisiológicas do trabalhador', 'Padronizar cadeiras baratas', 'Reduzir pausas ao mínimo'], answer: 1, explain: 'A NR-17 busca conforto, segurança e desempenho: o trabalho se adapta à pessoa, não o contrário.' },
+      { q: 'Na técnica correta de levantamento manual de carga, você deve:', options: ['Dobrar a cintura com pernas esticadas', 'Dobrar os joelhos, manter a coluna reta e erguer com as pernas', 'Girar o tronco enquanto levanta', 'Afastar a carga do corpo'], answer: 1, explain: 'Pernas fazem a força, coluna reta e carga junto ao corpo; torcer o tronco carregando peso lesiona a coluna.' },
+      { q: 'Qual ajuste de posto de trabalho em computador está correto?', options: ['Monitor bem abaixo da linha dos olhos', 'Topo do monitor na altura dos olhos, a ~50-70 cm, pés apoiados', 'Cadeira baixa demais, punhos dobrados para cima', 'Teclado longe, com braços esticados'], answer: 1, explain: 'Altura e distância corretas do monitor + pés apoiados evitam sobrecarga de pescoço, ombros e punhos.' },
+      { q: 'Formigamento frequente em punhos e mãos ao fim do dia indica:', options: ['Normalidade do trabalho', 'Possível sinal de LER/DORT — comunicar e avaliar cedo', 'Falta de café', 'Excesso de exercício em casa'], answer: 1, explain: 'Dor, formigamento e fadiga persistente são sinais de alerta de LER/DORT: quanto antes avaliar, melhor a recuperação.' }
+    ]
+  },
+  {
+    id: 'gro',
+    icon: '🧠',
+    title: 'Riscos Psicossociais — NR-01 (GRO)',
+    category: 'Normas Regulamentadoras',
+    color: '#9c36b5',
+    steps: [
+      { scene: 'mind-stress', title: 'O que são riscos psicossociais', text: 'Riscos psicossociais são aspectos da organização e das relações de trabalho que podem adoecer a mente e o corpo: sobrecarga, pressão excessiva, assédio, falta de autonomia e jornadas rígidas. Desde a atualização da NR-01, eles fazem parte do Gerenciamento de Riscos Ocupacionais (GRO) e devem estar no PGR da empresa, como qualquer outro risco.' },
+      { scene: 'mind-stress', title: 'Fatores organizacionais que adoecem', text: 'Os principais produtores de estresse ocupacional: sobrecarga de trabalho, pressão por metas inatingíveis, falta de autonomia e de reconhecimento, turnos rígidos e jornadas longas, comunicação ruim e insegurança no emprego. Estresse crônico não é "frescura": eleva o risco de ansiedade, depressão, hipertensão e também de ACIDENTES (atenção e reação reduzidas).' },
+      { scene: 'mind-support', title: 'Assédio é risco: prevenir e denunciar', text: 'Assédio moral (humilhações, isolamento, metas vexatórias, gritos) e assédio sexual (cantadas, insinuações, contato sem consentimento) são riscos psicossociais GRAVES e também ilícitos. A empresa deve prevenir com política clara, treinamento e canal de denúncia seguro e anônimo. Presenciar e se calar fortalece o agressor: registre fatos, datas e testemunhas e use o canal.' },
+      { scene: 'mind-support', title: 'Cuidar da mente é segurança', text: 'Estratégias que funcionam: pausas reais durante a jornada, sono suficiente, falar com alguém de confiança, buscar o canal de apoio/SAÚDE ocupacional da empresa e atividades que deem descarga ao estresse. Percebeu sinais persistentes (irritação, insônia, desânimo, cansaço mental)? Procure ajuda cedo — cuidar da saúde mental protege você, sua equipe e a segurança de todos.' }
+    ],
+    quiz: [
+      { q: 'Os riscos psicossociais devem ser gerenciados:', options: ['Apenas pelo RH, sem registro', 'Dentro do GRO/PGR, conforme a NR-01', 'Somente se houver queixa formal', 'Apenas em empresas com mais de 500 empregados'], answer: 1, explain: 'A NR-01 inclui os fatores psicossociais no Gerenciamento de Riscos Ocupacionais, com identificação e controle no PGR.' },
+      { q: 'Qual destes é um fator organizacional produtor de estresse?', options: ['Pausas regulares', 'Metas inatingíveis com pressão excessiva', 'Autonomia para organizar a tarefa', 'Comunicação clara'], answer: 1, explain: 'Sobrecarga, metas inatingíveis, falta de autonomia e comunicação ruim estão entre os principais produtores de estresse.' },
+      { q: 'Assédio moral no trabalho é:', options: ['Um estilo de liderança aceitável', 'Um risco psicossocial grave e ilícito, que a empresa deve prevenir', 'Algo que só existe fora do expediente', 'Uma brincadeira de equipe'], answer: 1, explain: 'Humilhações e constrangimentos repetidos são assédio moral: risco a ser prevenido e ilícito a ser apurado e punido.' },
+      { q: 'Estresse ocupacional crônico aumenta o risco de:', options: ['Apenas gripes', 'Adoecimento mental E acidentes de trabalho (atenção e reação reduzidas)', 'Somente problemas estéticos', 'Nada, é passageiro'], answer: 1, explain: 'O estresse crônico adoece a mente e o corpo e reduz atenção e tempo de reação, elevando também o risco de acidentes.' }
+    ]
   }
 ];
+
+// Trilhas de certificação (NR-01, item 1.6.1.1): cada curso tem NR correspondente,
+// carga horária e conteúdo programático próprio — o certificado é emitido por curso.
+window.COURSES = [
+  {
+    id: 'ps', nr: '', title: 'Primeiros Socorros — Atendimento Básico', icon: '⛑️', color: '#c92a2a', hours: 8,
+    lessons: ['cortes', 'engasgo', 'rcp', 'queimaduras', 'fraturas', 'choque', 'samu'],
+    program: [
+      'Avaliação da cena e segurança do socorrista; acionamento do SAMU (192)',
+      'Hemorragias: pressão direta, curativos e sinais de choque',
+      'Obstrução de vias aéreas: reconhecimento e manobra de Heimlich (adulto, gestante e bebê)',
+      'Parada cardiorrespiratória: RCP de alta qualidade e uso do DEA',
+      'Queimaduras: classificação, primeiros cuidados e critérios de gravidade',
+      'Quedas, fraturas e imobilizações; suspeita de lesão de coluna',
+      'Choque elétrico: segurança da cena e condutas',
+      'Acidente vascular cerebral (AVC): sinais e comunicação com o 192'
+    ]
+  },
+  {
+    id: 'nr23', nr: 'NR-23', title: 'Proteção Contra Incêndios — Princípio de Incêndio', icon: '🔥', color: '#e8590c', hours: 4,
+    lessons: ['incendio'],
+    program: [
+      'Triângulo do fogo: combustível, comburente e calor; métodos de extinção',
+      'Classes de fogo (A, B, C, D e K) e agentes extintores adequados',
+      'Uso correto do extintor: método PASS e limites de atuação',
+      'Evacuação segura: rotas de fuga, fumaça, ponto de encontro e acionamento do 193'
+    ]
+  },
+  {
+    id: 'nr6', nr: 'NR-06', title: 'Equipamentos de Proteção Individual (EPI)', icon: '🦺', color: '#f08c00', hours: 2,
+    lessons: ['nr6'],
+    program: [
+      'Definição e finalidade do EPI',
+      'Direitos e deveres do empregador e do trabalhador',
+      'Responsabilidades de uso, guarda, conservação, manutenção e higienização',
+      'Forma correta de utilização e ajuste do EPI',
+      'Limitações de proteção do equipamento',
+      'Procedimentos para substituição de EPI danificado ou extraviado'
+    ]
+  },
+  {
+    id: 'nr35', nr: 'NR-35', title: 'Trabalho em Altura', icon: '🧗', color: '#1971c2', hours: 8,
+    lessons: ['nr35'],
+    program: [
+      'Normas e regulamentos aplicáveis ao trabalho em altura',
+      'Análise de Risco e condições impeditivas',
+      'Riscos potenciais inerentes ao trabalho em altura e medidas de prevenção e controle',
+      'Sistemas, equipamentos e procedimentos de proteção coletiva e individual (SPCQ)',
+      'Acidentes típicos em trabalho em altura',
+      'Condutas em situações de emergência, incluindo noções de técnicas de resgate e de primeiros socorros'
+    ]
+  },
+  {
+    id: 'nr18', nr: 'NR-18', title: 'Segurança na Construção Civil', icon: '🏗️', color: '#e67700', hours: 4,
+    lessons: ['nr18'],
+    program: [
+      'Informações sobre as condições e meio ambiente de trabalho na obra',
+      'Riscos inerentes às atividades desenvolvidas na respectiva fase da obra',
+      'Equipamentos de Proteção Coletiva (EPC) existentes na obra',
+      'Uso adequado dos Equipamentos de Proteção Individual (EPI)',
+      'Medidas de prevenção e procedimentos de emergência adotados na obra'
+    ]
+  },
+  {
+    id: 'nr12', nr: 'NR-12', title: 'Segurança no Trabalho em Máquinas e Equipamentos', icon: '⚙️', color: '#495057', hours: 8,
+    lessons: ['nr12'],
+    program: [
+      'Histórico da regulamentação de segurança sobre máquinas e equipamentos',
+      'Descrição e funcionamento da máquina e seus riscos',
+      'Riscos na operação, principais zonas de perigo e pontos de esmagamento/aprisionamento',
+      'Medidas e dispositivos de segurança (proteções fixas, móveis e intertravamentos)',
+      'Funcionamento dos dispositivos de intertravamento e botões de emergência',
+      'Métodos de trabalho seguro, permissão de trabalho e bloqueio de energias perigosas (LOTO)',
+      'Riscos adicionais (eletricidade, ruído, ergonomia, calor)',
+      'Procedimentos em situações de emergência e primeiros socorros'
+    ]
+  },
+  {
+    id: 'nr11', nr: 'NR-11', title: 'Transporte, Movimentação, Armazenagem e Manuseio de Materiais', icon: '📦', color: '#5f3dc4', hours: 16,
+    lessons: ['nr11'],
+    program: [
+      'Legislação específica e aspectos de segurança na movimentação de materiais',
+      'Conceitos de estabilidade de carga (triângulo de estabilidade) e capacidade nominal',
+      'Inspeção diária (checklist de pré-operação) dos equipamentos de elevação/transporte',
+      'Regras de segurança na operação e circulação em vias internas',
+      'Sinalização de segurança e movimentação de cargas especiais',
+      'Procedimentos de segurança no carregamento, descarregamento e empilhamento',
+      'Prevenção de acidentes e noções de primeiros socorros'
+    ]
+  },
+  {
+    id: 'nr20', nr: 'NR-20', title: 'Segurança com Inflamáveis e Combustíveis — Curso Básico', icon: '🛢️', color: '#d9480f', hours: 4,
+    lessons: ['nr20'],
+    program: [
+      'Inflamáveis: características, propriedades, perigos e riscos',
+      'Controles coletivos e individuais para trabalhos com inflamáveis',
+      'Fontes de ignição e seu controle',
+      'Procedimentos operacionais básicos e permissão para trabalho quente/frio',
+      'Proteção contra incêndio e explosões',
+      'Procedimentos básicos em situações de emergência (vazamentos, incêndios)'
+    ]
+  },
+  {
+    id: 'nr17', nr: 'NR-17', title: 'Ergonomia', icon: '🪑', color: '#0b7285', hours: 2,
+    lessons: ['nr17'],
+    program: [
+      'Conceitos básicos de ergonomia e a importância da NR-17',
+      'Riscos ergonômicos comuns (posturas inadequadas, repetitividade, esforço físico)',
+      'Levantamento, transporte e descarga individual de materiais de forma segura',
+      'Organização do trabalho (ritmos, pausas, metas) e sua relação com a fadiga',
+      'Regulagem e uso correto do mobiliário e equipamentos nos postos de trabalho',
+      'Sinais e sintomas de distúrbios osteomusculares (LER/DORT) e cansaço visual/mental'
+    ]
+  },
+  {
+    id: 'gro', nr: 'NR-01 (GRO)', title: 'Riscos Psicossociais no Trabalho', icon: '🧠', color: '#9c36b5', hours: 2,
+    lessons: ['gro'],
+    program: [
+      'Conceito de riscos psicossociais e sua inclusão no Gerenciamento de Riscos Ocupacionais (GRO/NR-01)',
+      'Fatores organizacionais produtores de estresse (sobrecarga, pressão por metas, falta de autonomia, turnos rígidos)',
+      'Prevenção e combate ao assédio moral e sexual no ambiente de trabalho',
+      'Impactos dos fatores psicossociais na segurança e incidência de acidentes de trabalho',
+      'Mecanismos de apoio, canais de denúncia e acolhimento interno da empresa',
+      'Estratégias de promoção da saúde mental e manejo do estresse ocupacional'
+    ]
+  }
+];
+
+window.COURSE_BY_ID = Object.fromEntries(window.COURSES.map((c) => [c.id, c]));
+window.LESSON_COURSE = Object.fromEntries(
+  window.COURSES.flatMap((c) => c.lessons.map((lid) => [lid, c.id]))
+);
 
 window.TOTAL_LESSONS = window.LESSONS.length;
 window.PASS_SCORE = 0.75; // 3 de 4 acertos

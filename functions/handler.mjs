@@ -11,10 +11,24 @@ const json = (body, status = 200, headers = {}) => Response.json(body, {
   headers: { "cache-control": "no-store", ...headers },
 });
 
-const LESSON_IDS = [
-  "incendio", "nr6", "cortes", "engasgo", "rcp",
-  "queimaduras", "fraturas", "choque", "samu",
-];
+// Trilhas de certificação (NR-01, item 1.6.1.1): curso -> módulos, carga horária padrão.
+// O conteúdo programático exibido no verso vive no catálogo do frontend (web/js/lessons.js).
+const COURSES = {
+  ps:   { nr: "",             title: "Primeiros Socorros — Atendimento Básico", hours: 8,  lessons: ["cortes", "engasgo", "rcp", "queimaduras", "fraturas", "choque", "samu"] },
+  nr23: { nr: "NR-23",        title: "Proteção Contra Incêndios — Princípio de Incêndio", hours: 4, lessons: ["incendio"] },
+  nr6:  { nr: "NR-06",        title: "Equipamentos de Proteção Individual (EPI)", hours: 2, lessons: ["nr6"] },
+  nr35: { nr: "NR-35",        title: "Trabalho em Altura", hours: 8,  lessons: ["nr35"] },
+  nr18: { nr: "NR-18",        title: "Segurança na Construção Civil", hours: 4,  lessons: ["nr18"] },
+  nr12: { nr: "NR-12",        title: "Segurança no Trabalho em Máquinas e Equipamentos", hours: 8, lessons: ["nr12"] },
+  nr11: { nr: "NR-11",        title: "Transporte, Movimentação, Armazenagem e Manuseio de Materiais", hours: 16, lessons: ["nr11"] },
+  nr20: { nr: "NR-20",        title: "Segurança com Inflamáveis e Combustíveis — Curso Básico", hours: 4, lessons: ["nr20"] },
+  nr17: { nr: "NR-17",        title: "Ergonomia", hours: 2,  lessons: ["nr17"] },
+  gro:  { nr: "NR-01 (GRO)",  title: "Riscos Psicossociais no Trabalho", hours: 2,  lessons: ["gro"] },
+};
+const LESSON_IDS = Object.values(COURSES).flatMap((c) => c.lessons);
+// Certificado consolidado: emitido quando o aluno conclui TODOS os módulos de TODOS os cursos.
+const GENERAL_ID = "geral";
+const GENERAL_TITLE = "Programa Completo — Segurança e Saúde do Trabalho";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASS_RATIO = 0.75;
 
@@ -101,6 +115,43 @@ function certCode() {
   return "DV-" + Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("").toUpperCase();
 }
 
+async function loadSettings(supabase) {
+  const { data, error } = await supabase.from("portal_settings")
+    .select("id,institution_name,institution_cnpj,institution_address,technical_name,technical_registry,instructor_name,instructor_registry,location,modality,hours_override")
+    .eq("id", "default")
+    .maybeSingle();
+  if (error) return { error };
+  return { data: data || null };
+}
+
+function settingsSnapshot(s) {
+  if (!s) return {};
+  return {
+    institutionName: s.institution_name || "",
+    institutionCnpj: s.institution_cnpj || "",
+    institutionAddress: s.institution_address || "",
+    technicalName: s.technical_name || "",
+    technicalRegistry: s.technical_registry || "",
+    instructorName: s.instructor_name || "",
+    instructorRegistry: s.instructor_registry || "",
+    location: s.location || "",
+    modality: s.modality || "",
+  };
+}
+
+function courseHours(courseId, settings) {
+  const course = COURSES[courseId];
+  let hours = course.hours;
+  if (settings && typeof settings.hours_override === "string" && settings.hours_override.trim()) {
+    try {
+      const map = JSON.parse(settings.hours_override);
+      const v = map && map[courseId];
+      if (Number.isFinite(v) && v > 0 && v <= 200) hours = Math.round(v);
+    } catch { /* override inválido: mantém o padrão do catálogo */ }
+  }
+  return hours;
+}
+
 async function issueCertificate({ request, supabase }, params) {
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405, { allow: "POST" });
   const body = await readBody(request);
@@ -109,29 +160,44 @@ async function issueCertificate({ request, supabase }, params) {
   const name = str(body.name, 2, 100);
   const emailRaw = str(body.email, 5, 160);
   const company = body.company == null || body.company === "" ? "" : str(body.company, 2, 100);
+  const courseId = typeof body.courseId === "string" && (COURSES[body.courseId] || body.courseId === GENERAL_ID) ? body.courseId : null;
   const email = emailRaw && EMAIL_RE.test(emailRaw) ? emailRaw.toLowerCase() : null;
-  if (!name || !email || company === null) return json({ error: "invalid_input" }, 400);
+  if (!name || !email || company === null || !courseId) return json({ error: "invalid_input" }, 400);
+  const isGeneral = courseId === GENERAL_ID;
+  const requiredLessons = isGeneral ? LESSON_IDS : COURSES[courseId].lessons;
+  const courseTitle = isGeneral ? GENERAL_TITLE : COURSES[courseId].title;
 
   const { data: results, error: rErr } = await supabase.from("training_results")
-    .select("lesson_id,passed")
+    .select("lesson_id,passed,completed_at")
     .eq("email", email)
     .limit(LESSON_IDS.length * 2);
   if (rErr || !Array.isArray(results)) return json({ error: "database_request_failed" }, 503);
 
-  const passedIds = new Set(results.filter((r) => r.passed === true).map((r) => r.lesson_id));
-  const missing = LESSON_IDS.filter((id) => !passedIds.has(id));
+  const passedRows = results.filter((r) => r.passed === true && requiredLessons.includes(r.lesson_id));
+  const passedIds = new Set(passedRows.map((r) => r.lesson_id));
+  const missing = requiredLessons.filter((id) => !passedIds.has(id));
   if (missing.length > 0) return json({ error: "not_all_passed", missing }, 400);
 
-  // Certificado existente é reutilizado (idempotente por aluno).
+  const dates = passedRows.map((r) => r.completed_at).filter((d) => typeof d === "string").sort();
+  const startedAt = dates[0] || new Date().toISOString();
+  const finishedAt = dates[dates.length - 1] || startedAt;
+
+  const { data: settings, error: sErr } = await loadSettings(supabase);
+  if (sErr) return json({ error: "database_request_failed" }, 503);
+  const snap = settingsSnapshot(settings);
+  const hours = isGeneral
+    ? Object.keys(COURSES).reduce((sum, cid) => sum + courseHours(cid, settings), 0)
+    : courseHours(courseId, settings);
+
+  // Certificado existente é reutilizado (idempotente por aluno + curso).
   const { data: existing, error: eErr } = await supabase.from("certificates")
-    .select("id,code,student_name,company,issued_at")
+    .select("id,code,student_name,company,issued_at,course_id,course_title,hours,started_at,finished_at,location,modality,institution_name,institution_cnpj,institution_address,technical_name,technical_registry,instructor_name,instructor_registry")
     .eq("email", email)
-    .order("issued_at", { ascending: true })
-    .limit(1)
+    .eq("course_id", courseId)
     .maybeSingle();
   if (eErr) return json({ error: "database_request_failed" }, 503);
   if (existing) {
-    return json({ ok: true, code: existing.code, issuedAt: existing.issued_at, name: existing.student_name, company: existing.company });
+    return json({ ok: true, ...settingsSnapshot(existing), code: existing.code, issuedAt: existing.issued_at, name: existing.student_name, company: existing.company, courseId, courseTitle: existing.course_title, hours: existing.hours, startedAt: existing.started_at, finishedAt: existing.finished_at });
   }
 
   const code = certCode();
@@ -143,10 +209,37 @@ async function issueCertificate({ request, supabase }, params) {
     email,
     company,
     issued_at: issuedAt,
+    course_id: courseId,
+    course_title: courseTitle,
+    hours,
+    started_at: startedAt,
+    finished_at: finishedAt,
+    location: snap.location,
+    modality: snap.modality,
+    institution_name: snap.institutionName,
+    institution_cnpj: snap.institutionCnpj,
+    institution_address: snap.institutionAddress,
+    technical_name: snap.technicalName,
+    technical_registry: snap.technicalRegistry,
+    instructor_name: snap.instructorName,
+    instructor_registry: snap.instructorRegistry,
   }).select("id,code,issued_at").single();
   if (cErr || !created) return json({ error: "database_request_failed" }, 503);
 
-  return json({ ok: true, code: created.code, issuedAt: created.issued_at, name, company });
+  return json({ ok: true, ...snap, code: created.code, issuedAt: created.issued_at, name, company, courseId, courseTitle, hours, startedAt, finishedAt });
+}
+
+async function myCertificates({ supabase }, params) {
+  const emailRaw = (params.get("email") || "").trim().toLowerCase();
+  if (!EMAIL_RE.test(emailRaw) || emailRaw.length > 160) return json({ error: "invalid_input" }, 400);
+
+  const { data, error } = await supabase.from("certificates")
+    .select("code,course_id,course_title,hours,started_at,finished_at,issued_at,location,modality,institution_name,institution_cnpj,institution_address,technical_name,technical_registry,instructor_name,instructor_registry")
+    .eq("email", emailRaw)
+    .order("issued_at", { ascending: true })
+    .limit(50);
+  if (error || !Array.isArray(data)) return json({ error: "database_request_failed" }, 503);
+  return json({ ok: true, items: data });
 }
 
 // ---------- área do instrutor ----------
@@ -224,8 +317,8 @@ async function instructorReport({ request, supabase }) {
   if (rErr || !Array.isArray(results)) return json({ error: "database_request_failed" }, 503);
 
   const { data: certs, error: cErr } = await supabase.from("certificates")
-    .select("email,code,issued_at")
-    .limit(2000);
+    .select("email,code,course_id,course_title,issued_at")
+    .limit(5000);
   if (cErr || !Array.isArray(certs)) return json({ error: "database_request_failed" }, 503);
 
   const byEmail = new Map();
@@ -249,23 +342,28 @@ async function instructorReport({ request, supabase }) {
     }
   }
 
-  const certByEmail = new Map();
+  const certsByEmail = new Map();
   for (const c of certs) {
     if (!c || typeof c.email !== "string") continue;
-    const prev = certByEmail.get(c.email);
-    if (!prev || (c.issued_at || "") < prev.issued_at) certByEmail.set(c.email, c);
+    const list = certsByEmail.get(c.email);
+    const item = { code: c.code, courseId: c.course_id || "geral", courseTitle: c.course_title || "Curso de Segurança do Trabalho e Primeiros Socorros", issuedAt: c.issued_at };
+    if (list) list.push(item); else certsByEmail.set(c.email, [item]);
   }
 
   const students = Array.from(byEmail.values()).map((s) => {
     const entries = Object.entries(s.modules);
     const passedCount = entries.filter(([, m]) => m.passed).length;
-    const cert = certByEmail.get(s.email);
+    const certificates = certsByEmail.get(s.email) || [];
+    const coursesDone = Object.keys(COURSES).filter((cid) =>
+      COURSES[cid].lessons.every((lid) => s.modules[lid] && s.modules[lid].passed));
     return {
       email: s.email, name: s.name, company: s.company,
       passedCount, attempted: entries.length,
       modules: s.modules,
       lastActivity: s.lastActivity,
-      certificate: cert ? { code: cert.code, issuedAt: cert.issued_at } : null,
+      coursesDone,
+      certificates,
+      certificate: certificates[0] || null,
     };
   }).sort((a, b) => (b.lastActivity || "").localeCompare(a.lastActivity || ""));
 
@@ -275,12 +373,13 @@ async function instructorReport({ request, supabase }) {
     totals: {
       students: students.length,
       completedAll,
-      certificates: certByEmail.size,
+      certificates: certs.length,
       averageProgress: students.length
         ? Math.round(students.reduce((acc, s) => acc + s.passedCount / LESSON_IDS.length, 0) / students.length * 100)
         : 0,
     },
     lessonIds: LESSON_IDS,
+    courseIds: Object.keys(COURSES),
     students,
   });
 }
@@ -338,6 +437,74 @@ async function instructorDelete({ request, supabase }) {
   });
 }
 
+// ---------- dados cadastrais do certificado (NR-01) ----------
+const SETTINGS_FIELDS = {
+  institution_name: [2, 160], institution_cnpj: [0, 32], institution_address: [0, 240],
+  technical_name: [0, 100], technical_registry: [0, 60],
+  instructor_name: [0, 100], instructor_registry: [0, 60],
+  location: [0, 160], modality: [0, 60],
+};
+
+function parseSettingsBody(body) {
+  const out = {};
+  for (const [field, [min, max]] of Object.entries(SETTINGS_FIELDS)) {
+    const raw = body[field];
+    if (raw == null || raw === "") { out[field] = ""; continue; }
+    const v = str(raw, min, max);
+    if (v === null) return null;
+    out[field] = v;
+  }
+  if (body.hours_override == null || body.hours_override === "") out.hours_override = "";
+  else if (typeof body.hours_override === "object") {
+    const clean = {};
+    for (const [cid, v] of Object.entries(body.hours_override)) {
+      if (COURSES[cid] && Number.isFinite(v) && v > 0 && v <= 200) clean[cid] = Math.round(v);
+    }
+    out.hours_override = JSON.stringify(clean);
+  } else return null;
+  return out;
+}
+
+async function instructorSettings({ request, supabase }) {
+  if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405, { allow: "GET" });
+  const ip = clientIp(request);
+  if (throttled(ip)) return json({ error: "too_many_attempts" }, 429);
+  const password = request.headers.get("x-instructor-pass");
+  if (!(await passwordMatches(password))) {
+    registerFail(ip);
+    return json({ error: "invalid_credentials" }, 401);
+  }
+  failCounts.delete(ip);
+  const { data, error } = await loadSettings(supabase);
+  if (error) return json({ error: "database_request_failed" }, 503);
+  return json({ ok: true, settings: data });
+}
+
+async function instructorSaveSettings({ request, supabase }) {
+  if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405, { allow: "POST" });
+  const ip = clientIp(request);
+  if (throttled(ip)) return json({ error: "too_many_attempts" }, 429);
+  const body = await readBody(request);
+  if (!body || typeof body !== "object") return json({ error: "invalid_input" }, 400);
+  if (!(await passwordMatches(typeof body.password === "string" ? body.password : null))) {
+    registerFail(ip);
+    return json({ error: "invalid_credentials" }, 401);
+  }
+  failCounts.delete(ip);
+  const fields = parseSettingsBody(body);
+  if (!fields) return json({ error: "invalid_input" }, 400);
+
+  const { data, error } = await supabase.from("portal_settings").upsert({
+    id: "default",
+    ...fields,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "id" })
+    .select("id,institution_name,institution_cnpj,institution_address,technical_name,technical_registry,instructor_name,instructor_registry,location,modality,hours_override")
+    .single();
+  if (error || !data) return json({ error: "database_request_failed" }, 503);
+  return json({ ok: true, settings: data });
+}
+
 export async function handlePortal({ request, supabase }) {
   const params = new URL(request.url).searchParams;
   const action = params.get("action");
@@ -348,7 +515,13 @@ export async function handlePortal({ request, supabase }) {
       return await myResults({ supabase }, params);
     }
     if (action === "issue_certificate") return await issueCertificate({ request, supabase }, params);
+    if (action === "my_certificates") {
+      if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405, { allow: "GET" });
+      return await myCertificates({ supabase }, params);
+    }
     if (action === "instructor_report") return await instructorReport({ request, supabase }, params);
+    if (action === "instructor_settings") return await instructorSettings({ request, supabase });
+    if (action === "instructor_save_settings") return await instructorSaveSettings({ request, supabase });
     if (action === "instructor_save_result") return await instructorSaveResult({ request, supabase }, params);
     if (action === "instructor_delete") return await instructorDelete({ request, supabase }, params);
     return json({ error: "not_found" }, 404);
