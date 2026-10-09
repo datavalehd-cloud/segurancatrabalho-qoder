@@ -20,10 +20,14 @@
   function loadStudentData() {
     try { progress = JSON.parse(localStorage.getItem(scopedKey(LS_PROGRESS))) || {}; } catch { progress = {}; }
     try { pending = JSON.parse(localStorage.getItem(scopedKey(LS_PENDING))) || []; } catch { pending = []; }
+<<<<<<< HEAD
     try {
       const raw = JSON.parse(localStorage.getItem(scopedKey(LS_CERT)));
       certs = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
     } catch { certs = {}; }
+=======
+    try { cert = JSON.parse(localStorage.getItem(scopedKey(LS_CERT))) || null; } catch { cert = null; }
+>>>>>>> 53077e07550642fb55ae111161363b44dafbdfeb
   }
   function load() {
     try { student = JSON.parse(localStorage.getItem(LS_STUDENT)) || null; } catch { student = null; }
@@ -32,6 +36,7 @@
   function saveStudent() { localStorage.setItem(LS_STUDENT, JSON.stringify(student)); }
   function saveProgress() { localStorage.setItem(scopedKey(LS_PROGRESS), JSON.stringify(progress)); }
   function savePending() { localStorage.setItem(scopedKey(LS_PENDING), JSON.stringify(pending)); }
+<<<<<<< HEAD
   function saveCerts() { localStorage.setItem(scopedKey(LS_CERT), JSON.stringify(certs)); }
 
   const courseDone = (c) => c.lessons.every((id) => progress[id] && progress[id].passed);
@@ -54,6 +59,9 @@
       general: true,
     };
   }
+=======
+  function saveCert() { localStorage.setItem(scopedKey(LS_CERT), JSON.stringify(cert)); }
+>>>>>>> 53077e07550642fb55ae111161363b44dafbdfeb
 
   function esc(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
