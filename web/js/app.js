@@ -20,14 +20,10 @@
   function loadStudentData() {
     try { progress = JSON.parse(localStorage.getItem(scopedKey(LS_PROGRESS))) || {}; } catch { progress = {}; }
     try { pending = JSON.parse(localStorage.getItem(scopedKey(LS_PENDING))) || []; } catch { pending = []; }
-<<<<<<< HEAD
     try {
       const raw = JSON.parse(localStorage.getItem(scopedKey(LS_CERT)));
       certs = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
     } catch { certs = {}; }
-=======
-    try { cert = JSON.parse(localStorage.getItem(scopedKey(LS_CERT))) || null; } catch { cert = null; }
->>>>>>> 53077e07550642fb55ae111161363b44dafbdfeb
   }
   function load() {
     try { student = JSON.parse(localStorage.getItem(LS_STUDENT)) || null; } catch { student = null; }
@@ -36,7 +32,6 @@
   function saveStudent() { localStorage.setItem(LS_STUDENT, JSON.stringify(student)); }
   function saveProgress() { localStorage.setItem(scopedKey(LS_PROGRESS), JSON.stringify(progress)); }
   function savePending() { localStorage.setItem(scopedKey(LS_PENDING), JSON.stringify(pending)); }
-<<<<<<< HEAD
   function saveCerts() { localStorage.setItem(scopedKey(LS_CERT), JSON.stringify(certs)); }
 
   const courseDone = (c) => c.lessons.every((id) => progress[id] && progress[id].passed);
@@ -59,9 +54,6 @@
       general: true,
     };
   }
-=======
-  function saveCert() { localStorage.setItem(scopedKey(LS_CERT), JSON.stringify(cert)); }
->>>>>>> 53077e07550642fb55ae111161363b44dafbdfeb
 
   function esc(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -75,6 +67,46 @@
   function passedCount() {
     return LESSONS.filter((l) => progress[l.id] && progress[l.id].passed).length;
   }
+
+  // ---------- narração das aulas (Web Speech API, pt-BR, sob demanda) ----------
+  const hasTTS = typeof window !== 'undefined' && 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function';
+  let ttsVoice = null;
+  function pickTtsVoice() {
+    if (!hasTTS) return null;
+    const vs = window.speechSynthesis.getVoices() || [];
+    return vs.find((v) => /pt[-_]BR/i.test(v.lang)) || vs.find((v) => /^pt/i.test(v.lang)) || null;
+  }
+  if (hasTTS) {
+    ttsVoice = pickTtsVoice();
+    window.speechSynthesis.onvoiceschanged = () => { ttsVoice = pickTtsVoice(); };
+  }
+  const Narrator = {
+    speaking: false,
+    _cur: null,
+    speak(text, handlers) {
+      if (!hasTTS) return false;
+      const h = handlers || {};
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'pt-BR';
+      if (ttsVoice) u.voice = ttsVoice;
+      u.rate = 1; u.pitch = 1;
+      this._cur = u;
+      this.speaking = true;
+      const done = () => { if (this._cur !== u) return; this._cur = null; this.speaking = false; if (h.onend) h.onend(); };
+      u.onstart = () => { if (this._cur === u && h.onstart) h.onstart(); };
+      u.onend = done;
+      u.onerror = done;
+      window.speechSynthesis.speak(u);
+      return true;
+    },
+    stop() {
+      if (!hasTTS) return;
+      this._cur = null;
+      this.speaking = false;
+      window.speechSynthesis.cancel();
+    },
+  };
 
   // ---------- sincronização com a nuvem ----------
   async function flushPending() {
@@ -146,6 +178,7 @@
 
   // ---------- rotas ----------
   function route() {
+    Narrator.stop();
     const hash = location.hash || '#/painel';
     if (hash === '#/instrutor') { renderInstructor(); return; }
     if (!student) { renderLogin(); return; }
@@ -319,6 +352,7 @@
     let stepIdx = 0;
 
     function renderStep() {
+      Narrator.stop();
       const st = lesson.steps[stepIdx];
       const last = stepIdx === lesson.steps.length - 1;
       app.innerHTML = `
@@ -334,12 +368,26 @@
         <div class="lesson-body">
           <h1>${esc(st.title)}</h1>
           <p>${esc(st.text)}</p>
+          ${hasTTS ? `<div class="narrate-row"><button class="btn ghost narrate" id="btn-narrate" aria-live="polite">🔊 Ouvir narração</button></div>` : ''}
           <div class="lesson-nav">
             <button class="btn ghost" id="btn-prev" ${stepIdx === 0 ? 'disabled' : ''}>← Anterior</button>
             <button class="btn primary" id="btn-next">${last ? 'Ir para o quiz 🎯' : 'Próximo →'}</button>
           </div>
         </div>
       </main>`;
+      const nb = $('#btn-narrate');
+      if (nb) {
+        const narrText = `${st.title}. ${st.text}`;
+        const paint = () => {
+          nb.innerHTML = Narrator.speaking ? '⏹ Parar narração' : '🔊 Ouvir narração';
+          nb.classList.toggle('speaking', Narrator.speaking);
+        };
+        nb.addEventListener('click', () => {
+          if (Narrator.speaking) { Narrator.stop(); paint(); return; }
+          Narrator.speak(narrText, { onstart: paint, onend: paint });
+          paint();
+        });
+      }
       $('#btn-prev').addEventListener('click', () => { if (stepIdx > 0) { stepIdx--; renderStep(); } });
       $('#btn-next').addEventListener('click', () => {
         if (last) startQuiz(); else { stepIdx++; renderStep(); }
@@ -347,6 +395,7 @@
     }
 
     function startQuiz() {
+      Narrator.stop();
       let qIdx = 0, correct = 0, locked = false;
 
       function renderQuestion() {
