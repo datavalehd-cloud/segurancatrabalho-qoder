@@ -670,7 +670,6 @@
           <p class="cert-text small">Local de realização: <strong>${esc(location)}</strong> • Modalidade: <strong>${esc(modality)}</strong></p>
           <div class="cert-signs">
             ${sig(student.name, 'Assinatura do trabalhador')}
-            ${sig(d.instructorName, 'Assinatura do instrutor', d.instructorRegistry)}
             ${sig(d.technicalName, 'Assinatura do responsável técnico', d.technicalRegistry)}
           </div>
           <div class="cert-foot">
@@ -696,7 +695,7 @@
           <h3 class="cert-sub">Instituição ministrante</h3>
           <p class="cert-text small">${esc(institution)} • ${esc(cnpj)}${d.institutionAddress ? ' • ' + esc(d.institutionAddress) : ''}</p>
           <p class="cert-text small"><strong>Responsável técnico:</strong> ${esc(d.technicalName || 'a informar')}${d.technicalRegistry ? ' (' + esc(d.technicalRegistry) + ')' : ''} • <strong>Instrutor:</strong> ${esc(d.instructorName || 'a informar')}${d.instructorRegistry ? ' (' + esc(d.instructorRegistry) + ')' : ''}</p>
-          <p class="cert-text small">Este certificado é emitido conforme o item 1.6.1.1 da NR-01 e contém, na frente e no verso, os dados exigidos para fiscalização: nome do trabalhador, curso/norma correspondente, carga horária total, datas de início e término, local de realização, assinaturas do trabalhador, do instrutor e do responsável técnico, conteúdo programático e dados da instituição ministrante e da contratante.</p>
+          <p class="cert-text small">Este certificado é emitido conforme o item 1.6.1.1 da NR-01 e contém, na frente e no verso, os dados exigidos para fiscalização: nome do trabalhador, curso/norma correspondente, carga horária total, datas de início e término, local de realização, assinaturas do trabalhador e do responsável técnico, conteúdo programático e dados da instituição ministrante e da contratante.</p>
           <div class="cert-foot">
             <div>
               <div class="cert-date">${d.code || 'PRÉVIA SEM CÓDIGO'}</div>
