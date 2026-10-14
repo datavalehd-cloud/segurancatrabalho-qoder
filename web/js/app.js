@@ -694,7 +694,7 @@
           ${programHtml}
           <h3 class="cert-sub">Instituição ministrante</h3>
           <p class="cert-text small">${esc(institution)} • ${esc(cnpj)}${d.institutionAddress ? ' • ' + esc(d.institutionAddress) : ''}</p>
-          <p class="cert-text small"><strong>Responsável técnico:</strong> ${esc(d.technicalName || 'a informar')}${d.technicalRegistry ? ' (' + esc(d.technicalRegistry) + ')' : ''} • <strong>Instrutor:</strong> ${esc(d.instructorName || 'a informar')}${d.instructorRegistry ? ' (' + esc(d.instructorRegistry) + ')' : ''}</p>
+          <p class="cert-text small"><strong>Responsável técnico:</strong> ${esc(d.technicalName || 'a informar')}${d.technicalRegistry ? ' (' + esc(d.technicalRegistry) + ')' : ''}</p>
           <p class="cert-text small">Este certificado é emitido conforme o item 1.6.1.1 da NR-01 e contém, na frente e no verso, os dados exigidos para fiscalização: nome do trabalhador, curso/norma correspondente, carga horária total, datas de início e término, local de realização, assinaturas do trabalhador e do responsável técnico, conteúdo programático e dados da instituição ministrante e da contratante.</p>
           <div class="cert-foot">
             <div>
