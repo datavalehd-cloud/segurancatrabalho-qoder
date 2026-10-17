@@ -66,16 +66,19 @@ await out('my_certificates:', await handlePortal({ request: req('my_certificates
 await out('issue geral (incompleto):', await handlePortal({ request: req('issue_certificate', body({ name: 'Ana', email: 'ana@x.com', company: '', courseId: 'geral' })), supabase: sb }));
 
 // 9) Bruno conclui TODOS os módulos -> geral ok, hours = soma (com override nr23=6)
-const ALL = ['cortes','engasgo','rcp','queimaduras','fraturas','choque','samu','incendio','nr6','nr35','nr18','nr12','nr11','nr20','nr17','gro'];
+const ALL = ['cortes','engasgo','rcp','queimaduras','fraturas','choque','samu','incendio','nr6','nr35','nr18','nr12','nr11','nr20','nr17','gro','cipa'];
 for (const [i, lid] of ALL.entries()) {
   tables.training_results.push({ email: 'bruno@x.com', lesson_id: lid, passed: true, completed_at: `2026-09-${String(i + 1).padStart(2, '0')}T10:00:00.000Z`, score: 4, total: 4, student_name: 'Bruno', company: '' });
 }
 const geral = await handlePortal({ request: req('issue_certificate', body({ name: 'Bruno', email: 'bruno@x.com', company: 'ACME', courseId: 'geral' })), supabase: sb });
 const gj = await geral.json();
 console.log('issue geral (ok):', geral.status, JSON.stringify(gj));
-console.log('geral -> courseTitle:', gj.courseTitle, '| hours (esperado 60):', gj.hours, '| started:', gj.startedAt, '| finished:', gj.finishedAt);
+console.log('geral -> courseTitle:', gj.courseTitle, '| hours (esperado 80):', gj.hours, '| started:', gj.startedAt, '| finished:', gj.finishedAt);
 
 // 10) idempotência do geral + endereço da instituição preservado
 await out('issue geral (again):', await handlePortal({ request: req('issue_certificate', body({ name: 'Bruno', email: 'bruno@x.com', company: 'ACME', courseId: 'geral' })), supabase: sb }));
+
+// 11) certificado individual do novo curso NR-05 (cipa), 20h
+await out('issue cipa (ok):', await handlePortal({ request: req('issue_certificate', body({ name: 'Bruno', email: 'bruno@x.com', company: 'ACME', courseId: 'cipa' })), supabase: sb }));
 
 console.log('certificates rows:', tables.certificates.length, '| hours override aplicado:', tables.certificates[0]?.hours);

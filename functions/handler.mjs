@@ -24,6 +24,7 @@ const COURSES = {
   nr20: { nr: "NR-20",        title: "Segurança com Inflamáveis e Combustíveis — Curso Básico", hours: 4, lessons: ["nr20"] },
   nr17: { nr: "NR-17",        title: "Ergonomia", hours: 2,  lessons: ["nr17"] },
   gro:  { nr: "NR-01 (GRO)",  title: "Riscos Psicossociais no Trabalho", hours: 2,  lessons: ["gro"] },
+  cipa: { nr: "NR-05",        title: "CIPA e o Representante Nomeado", hours: 20, lessons: ["cipa"] },
 };
 const LESSON_IDS = Object.values(COURSES).flatMap((c) => c.lessons);
 // Certificado consolidado: emitido quando o aluno conclui TODOS os módulos de TODOS os cursos.

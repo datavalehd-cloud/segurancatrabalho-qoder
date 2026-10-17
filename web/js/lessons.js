@@ -304,6 +304,26 @@ window.LESSONS = [
       { q: 'Assédio moral no trabalho é:', options: ['Um estilo de liderança aceitável', 'Um risco psicossocial grave e ilícito, que a empresa deve prevenir', 'Algo que só existe fora do expediente', 'Uma brincadeira de equipe'], answer: 1, explain: 'Humilhações e constrangimentos repetidos são assédio moral: risco a ser prevenido e ilícito a ser apurado e punido.' },
       { q: 'Estresse ocupacional crônico aumenta o risco de:', options: ['Apenas gripes', 'Adoecimento mental E acidentes de trabalho (atenção e reação reduzidas)', 'Somente problemas estéticos', 'Nada, é passageiro'], answer: 1, explain: 'O estresse crônico adoece a mente e o corpo e reduz atenção e tempo de reação, elevando também o risco de acidentes.' }
     ]
+  },
+  {
+    id: 'cipa',
+    icon: '🤝',
+    title: 'NR-05 — CIPA e o Representante Nomeado',
+    category: 'Normas Regulamentadoras',
+    color: '#087f5b',
+    steps: [
+      { scene: 'cipa-intro', title: 'O que é a CIPA e o representante nomeado', text: 'A NR-05 cria a CIPA — Comissão Interna de Prevenção de Acidentes e de Assédio — com o objetivo de prevenir acidentes e doenças decorrentes do trabalho. Quando a empresa não atinge o porte mínimo para constituir a comissão, ela deve DESIGNAR um representante nomeado para cumprir esses objetivos. CIPA e representante atuam em conjunto com o empregador, observando também os requisitos aplicáveis da NR-01.' },
+      { scene: 'cipa-risks', title: 'Estudar o ambiente e os riscos ocupacionais', text: 'Uma das principais funções é estudar o ambiente, as condições de trabalho e os riscos ocupacionais de cada setor: identificar perigos físicos, químicos, biológicos, ergonômicos e de acidentes, e propor medidas preventivas. Isso inclui noções de higiene do trabalho — controlar o risco na fonte, no trajeto e no trabalhador — sempre priorizando a prevenção.' },
+      { scene: 'cipa-accidents', title: 'Acidentes e doenças do trabalho: prevenir e investigar', text: 'Acidentes e doenças relacionadas ao trabalho causam sofrimento, afastamentos e custos. A CIPA e o representante nomeado devem participar da investigação e análise de acidentes e doenças ocupacionais, apurando causas (e não culpados) para propor correções e evitar que se repitam. Todo acidente deve ser comunicado e analisado.' },
+      { scene: 'cipa-law', title: 'Legislação, direitos e inclusão', text: 'O representante precisa conhecer a legislação trabalhista e previdenciária ligada à Segurança e Saúde no Trabalho: direitos e deveres, CAT, estabilidade do cipeiro e benefícios previdenciários. A NR-05 também prevê a inclusão de pessoas com deficiência e de trabalhadores reabilitados, garantindo participação e adaptação de funções.' },
+      { scene: 'cipa-respect', title: 'Ambiente respeitoso: prevenir assédio e violência', text: 'A NR-05 inclui expressamente a prevenção do assédio sexual e de outras formas de violência no trabalho. A CIPA e o representante nomeado devem promover um ambiente respeitoso, divulgar canais de denúncia seguros e acolher quem relata violência — assédio é risco psicossocial grave e deve ser prevenido e apurado.' }
+    ],
+    quiz: [
+      { q: 'Qual é o objetivo principal da CIPA (NR-05)?', options: ['Organizar eventos da empresa', 'Prevenir acidentes e doenças decorrentes do trabalho', 'Controlar a jornada dos funcionários', 'Comprar equipamentos de proteção'], answer: 1, explain: 'A CIPA existe para prevenir acidentes e doenças relacionados ao trabalho, em conjunto com o empregador.' },
+      { q: 'Quando a empresa não atinge o porte mínimo para constituir CIPA, ela deve:', options: ['Ignorar a NR-05', 'Nada é exigido pela norma', 'Designar um representante nomeado para cumprir os objetivos da NR-05', 'Transferir a responsabilidade ao trabalhador'], answer: 2, explain: 'Sem CIPA constituída, a empresa designa um representante nomeado para cumprir os objetivos de prevenção da NR-05.' },
+      { q: 'Diante de um acidente de trabalho, uma atribuição da CIPA/representante nomeado é:', options: ['Culpar o acidentado', 'Esconder o ocorrido da equipe', 'Investigar e analisar as causas para prevenir novos acidentes', 'Apenas arquivar o registro sem apurar'], answer: 2, explain: 'A investigação busca as CAUSAS (não culpados) para propor correções e evitar a recorrência do acidente.' },
+      { q: 'A prevenção do assédio sexual e de outras formas de violência no trabalho é:', options: ['Parte do conteúdo e das atribuições da CIPA e do representante nomeado (NR-05)', 'Opcional para pequenas empresas', 'Assunto exclusivo do setor jurídico', 'Irrelevante para a segurança do trabalho'], answer: 0, explain: 'A NR-05 inclui expressamente a prevenção ao assédio e à violência no trabalho entre as atribuições da CIPA e do representante.' }
+    ]
   }
 ];
 
@@ -430,6 +450,22 @@ window.COURSES = [
       'Impactos dos fatores psicossociais na segurança e incidência de acidentes de trabalho',
       'Mecanismos de apoio, canais de denúncia e acolhimento interno da empresa',
       'Estratégias de promoção da saúde mental e manejo do estresse ocupacional'
+    ]
+  },
+  {
+    id: 'cipa', nr: 'NR-05', title: 'CIPA e o Representante Nomeado', icon: '🤝', color: '#087f5b', hours: 20,
+    lessons: ['cipa'],
+    program: [
+      'Introdução à NR-5, à CIPA e às responsabilidades do representante nomeado',
+      'Estudo do ambiente, das condições de trabalho e dos riscos ocupacionais',
+      'Acidentes e doenças relacionadas ao trabalho e suas medidas de prevenção',
+      'Investigação e análise de acidentes e doenças ocupacionais',
+      'Noções de higiene do trabalho e medidas preventivas',
+      'Legislação trabalhista e previdenciária relacionada à Segurança e Saúde no Trabalho',
+      'Inclusão de pessoas com deficiência e trabalhadores reabilitados',
+      'Organização e atribuições da CIPA e do representante nomeado',
+      'Prevenção do assédio sexual e de outras formas de violência no trabalho',
+      'Estudos de caso, exercícios práticos e avaliação final'
     ]
   }
 ];

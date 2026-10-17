@@ -43,7 +43,12 @@
     'ergo-desk': { alt: 'Instrutora regulando posto de trabalho ergonômico com monitor na altura dos olhos', chip: 'Monitor no nível dos olhos • pés apoiados • pausas reais' },
     'ergo-lift': { alt: 'Instrutora demonstrando levantamento seguro com joelhos flexionados', chip: 'Dobre os joelhos • coluna reta • carga junto ao corpo' },
     'mind-stress': { alt: 'Instrutora acolhendo colega estressado com pilha de tarefas', chip: 'Sobrecarga e pressão adoecem — e viram acidente' },
-    'mind-support': { alt: 'Instrutora apontando canal de apoio e denúncia no mural', chip: 'Canal de denúncia seguro • acolhimento • ajuda cedo' }
+    'mind-support': { alt: 'Instrutora apontando canal de apoio e denúncia no mural', chip: 'Canal de denúncia seguro • acolhimento • ajuda cedo' },
+    'cipa-intro': { alt: 'Instrutora apresentando a CIPA a trabalhadores reunidos em mesa', chip: 'NR-05 • CIPA ou representante nomeado • prevenção de acidentes' },
+    'cipa-risks': { alt: 'Instrutora com prancheta apontando sinais de risco no ambiente de trabalho', chip: 'Estude o ambiente • identifique riscos • medidas preventivas' },
+    'cipa-accidents': { alt: 'Instrutora desenhando diagrama de investigação de acidente no quadro', chip: 'Investigar e analisar • prevenir recorrência' },
+    'cipa-law': { alt: 'Instrutora com documentos apontando símbolos de justiça e acessibilidade', chip: 'Legislação SST • inclusão de PcD e reabilitados' },
+    'cipa-respect': { alt: 'Instrutora apontando cartaz de respeito e combate ao assédio', chip: 'Assédio e violência no trabalho: prevenir e denunciar' }
   };
 
   window.getScene = function (id) {
