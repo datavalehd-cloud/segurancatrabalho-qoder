@@ -132,13 +132,24 @@
       cloudOk = true;
       if (data && Array.isArray(data.items)) {
         let changed = false;
+        const cloudIds = new Set();
         for (const it of data.items) {
+          cloudIds.add(it.lesson_id);
           const local = progress[it.lesson_id];
           if (!local || !local.cloud) {
             progress[it.lesson_id] = {
               score: it.score, total: it.total, passed: it.passed,
               completedAt: it.completed_at, cloud: true
             };
+            changed = true;
+          }
+        }
+        // remove do cache local os módulos já sincronizados que não existem mais na
+        // nuvem (ex.: apagados pelo instrutor); preserva itens offline/pendentes
+        const pendingIds = new Set(pending.map((p) => p.lessonId));
+        for (const id of Object.keys(progress)) {
+          if (progress[id] && progress[id].cloud && !cloudIds.has(id) && !pendingIds.has(id)) {
+            delete progress[id];
             changed = true;
           }
         }
@@ -166,10 +177,16 @@
       const res = await PortalApi.myCertificates(student.email);
       if (res && Array.isArray(res.items)) {
         let changed = false;
+        const cloudCourseIds = new Set();
         for (const r of res.items) {
           if (!r.course_id || !r.code) continue;
+          cloudCourseIds.add(r.course_id);
           const local = certs[r.course_id];
           if (!local || !local.code) { certs[r.course_id] = mapCert(r); changed = true; }
+        }
+        // remove certificados locais que não existem mais na nuvem (apagados pelo instrutor)
+        for (const id of Object.keys(certs)) {
+          if (!cloudCourseIds.has(id)) { delete certs[id]; changed = true; }
         }
         if (changed) saveCerts();
       }
