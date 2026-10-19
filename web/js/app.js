@@ -705,7 +705,7 @@
       <section class="cert cert-verso">
         <div class="cert-border">
           <h2 class="cert-title small">Verso — Conteúdo programático e validação</h2>
-          <p class="cert-text"><strong>Curso:</strong> ${esc(d.courseTitle || course.title)}${course.nr ? ' — ' + esc(course.nr) : ''}</p>
+          <p class="cert-text"><strong>${course.id === 'cipa' ? 'Treinamento' : 'Curso'}:</strong> ${esc(d.courseTitle || course.title)}${course.nr ? ' — ' + esc(course.nr) : ''}</p>
           <p class="cert-text"><strong>Carga horária total:</strong> ${hours} horas • <strong>Período:</strong> ${started} a ${finished} • <strong>Modalidade:</strong> ${esc(modality)} • <strong>Local:</strong> ${esc(location)}</p>
           <h3 class="cert-sub">${isGeneral ? 'Conteúdo programático (por curso)' : 'Conteúdo programático'}</h3>
           ${programHtml}
