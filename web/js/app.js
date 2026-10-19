@@ -635,6 +635,8 @@
 
   function showCertificate(course, data) {
     const d = data || {};
+    // no certificado da CIPA exibe apenas "CIPA" (sem "e o Representante Nomeado")
+    const certTitle = course.id === 'cipa' ? 'CIPA' : (d.courseTitle || course.title);
     const hours = d.hours || course.hours;
     const institution = d.institutionName || 'JL Consultoria — Saúde e Segurança do Trabalho';
     const cnpj = d.institutionCnpj ? `CNPJ ${esc(d.institutionCnpj)}` : 'CNPJ a informar pela instituição';
@@ -678,7 +680,7 @@
           <p class="cert-name">${esc(student.name)}</p>
           ${student.company ? `<p class="cert-text">da empresa <strong>${esc(student.company)}</strong> (contratante)</p>` : ''}
           <p class="cert-text">${concluiuTexto}</p>
-          <p class="cert-course">${esc(d.courseTitle || course.title)}${course.nr ? ` <span class="cert-nr">(${esc(course.nr)})</span>` : ''}</p>
+          <p class="cert-course">${esc(certTitle)}${course.nr ? ` <span class="cert-nr">(${esc(course.nr)})</span>` : ''}</p>
           <div class="cert-grid">
             <div><div class="cert-date">${hours}h</div><div class="cert-role">Carga horária total</div></div>
             <div><div class="cert-date">${started}</div><div class="cert-role">Data de início</div></div>
@@ -705,7 +707,7 @@
       <section class="cert cert-verso">
         <div class="cert-border">
           <h2 class="cert-title small">Verso — Conteúdo programático e validação</h2>
-          <p class="cert-text"><strong>${course.id === 'cipa' ? 'Treinamento' : 'Curso'}:</strong> ${esc(d.courseTitle || course.title)}${course.nr ? ' — ' + esc(course.nr) : ''}</p>
+          <p class="cert-text"><strong>${course.id === 'cipa' ? 'Treinamento' : 'Curso'}:</strong> ${esc(certTitle)}${course.nr ? ' — ' + esc(course.nr) : ''}</p>
           <p class="cert-text"><strong>Carga horária total:</strong> ${hours} horas • <strong>Período:</strong> ${started} a ${finished} • <strong>Modalidade:</strong> ${esc(modality)} • <strong>Local:</strong> ${esc(location)}</p>
           <h3 class="cert-sub">${isGeneral ? 'Conteúdo programático (por curso)' : 'Conteúdo programático'}</h3>
           ${programHtml}
